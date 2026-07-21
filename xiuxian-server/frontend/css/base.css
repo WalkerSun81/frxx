@@ -1,0 +1,230 @@
+/* ============================================
+   凡人修仙录 - 基础样式
+   目标：手机竖屏 9:16，基准宽度 375px
+   ============================================ */
+
+/* ---------- 根变量 ---------- */
+:root {
+  --design-width: 390;
+  --design-height: 694;
+
+  /* 字体大小 (1rem = 基准宽度的 10%，即 39px) */
+  --font-xs: 0.65rem;
+  --font-sm: 0.8rem;
+  --font-md: 0.92rem;
+  --font-lg: 1.1rem;
+  --font-xl: 1.3rem;
+  --font-2xl: 1.6rem;
+  --font-3xl: 2.0rem;
+
+  /* 主色调 - 古风暗色修仙 */
+  --color-bg:       #1a1a2e;
+  --color-bg-dark:  #12121f;
+  --color-panel:    #1e2a3a;
+  --color-panel-alt:#16213e;
+  --color-border:   #2a3a4a;
+  --color-gold:     #d4a54a;
+  --color-gold-dim: #8b6f2b;
+  --color-text:     #e0d5c1;
+  --color-text-dim: #8a8578;
+  --color-text-dark:#5a5548;
+  --color-danger:   #d44a4a;
+  --color-success:  #4caf50;
+  --color-info:     #2196f3;
+
+  /* 品质颜色 */
+  --q-white:  #c0c0c0;
+  --q-green:  #4caf50;
+  --q-blue:   #2196f3;
+  --q-purple: #9c27b0;
+  --q-orange: #ff9800;
+  --q-red:    #f44336;
+
+  /* 间距 */
+  --sp-xs: 5px;
+  --sp-sm: 10px;
+  --sp-md: 14px;
+  --sp-lg: 18px;
+  --sp-xl: 20px;
+  --sp-2xl: 24px;
+
+  /* 圆角 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+/* ---------- 基础重置 ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: calc(100vw / var(--design-width) * 10);
+  -webkit-text-size-adjust: none;
+}
+
+/* PC 端：字体以容器实际宽度计算，而非 vw */
+@media (min-width: 451px) {
+  html {
+    font-size: calc(450px / var(--design-width) * 10);
+  }
+}
+
+body {
+  font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--font-md);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* ---------- 外层容器 ---------- */
+.app-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg-dark);
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* PC端背景 */
+@media (min-width: 451px) {
+  body {
+    background: #0a0a1a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .app-container {
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ---------- 安全区域 ---------- */
+.app-container {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------- 滚动条隐藏 ---------- */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* ---------- 通用面板 ---------- */
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-md);
+}
+
+.panel-title {
+  font-size: var(--font-md);
+  color: var(--color-gold);
+  margin-bottom: var(--sp-sm);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--sp-xs);
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-sm) var(--sp-xl);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-md);
+  cursor: pointer;
+  transition: opacity 0.15s;
+  min-height: 2.6rem;
+}
+
+.btn:active {
+  opacity: 0.7;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.btn-primary {
+  background: var(--color-gold);
+  color: #1a1a2e;
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold-dim);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ---------- 品质文字颜色 ---------- */
+.q-white  { color: var(--q-white); }
+.q-green  { color: var(--q-green); }
+.q-blue   { color: var(--q-blue); }
+.q-purple { color: var(--q-purple); }
+.q-orange { color: var(--q-orange); }
+.q-red    { color: var(--q-red); }
+
+/* ---------- 通用文本 ---------- */
+.text-dim  { color: var(--color-text-dim); }
+.text-gold { color: var(--color-gold); }
+.text-sm   { font-size: var(--font-sm); }
+.text-xs   { font-size: var(--font-xs); }
+.text-center { text-align: center; }
+
+/* ---------- 加载/空状态 ---------- */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--sp-2xl);
+  color: var(--color-text-dim);
+}
+
+/* ---------- Toast提示 ---------- */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: var(--sp-md) var(--sp-xl);
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
+  z-index: 9999;
+  pointer-events: none;
+  animation: toastIn 0.2s ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}

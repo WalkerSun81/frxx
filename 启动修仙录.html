@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>凡人修仙录 - 启动器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    }
+    .launcher {
+      text-align: center;
+      padding: 60px 40px;
+      background: #1a1a2e;
+      border: 1px solid #2a3a4a;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 360px;
+    }
+    .icon { font-size: 3rem; margin-bottom: 20px; }
+    .title { font-size: 1.8rem; color: #d4a54a; letter-spacing: 0.3em; margin-bottom: 8px; }
+    .subtitle { font-size: 0.85rem; color: #8a8578; margin-bottom: 32px; }
+    .status { font-size: 0.8rem; color: #8a8578; margin-bottom: 24px; }
+    .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .status .dot.on { background: #4caf50; }
+    .status .dot.off { background: #d44a4a; }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      background: #d4a54a;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      text-decoration: none;
+    }
+    .btn:active { opacity: 0.7; }
+    .btn:disabled { opacity: 0.4; pointer-events: none; }
+    .hint { font-size: 0.7rem; color: #5a5548; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="launcher">
+    <div class="icon">&#x2694;</div>
+    <div class="title">凡人修仙录</div>
+    <div class="subtitle">文字挂机修仙 RPG</div>
+    <div class="status" id="status">
+      <span class="dot" id="dot"></span>
+      <span id="text">检测中...</span>
+    </div>
+    <a class="btn" id="btn" href="http://localhost:3000" target="_blank">踏入仙途</a>
+    <div class="hint">vp0.1 — 需先启动服务端</div>
+  </div>
+
+  <script>
+    (async function () {
+      var dot = document.getElementById('dot');
+      var text = document.getElementById('text');
+      var btn = document.getElementById('btn');
+
+      try {
+        var resp = await fetch('http://localhost:3000/api/health');
+        var data = await resp.json();
+        if (data.code === 0) {
+          dot.className = 'dot on';
+          text.textContent = '服务已就绪';
+        } else {
+          dot.className = 'dot off';
+          text.textContent = '服务异常';
+          btn.classList.add('disabled');
+        }
+      } catch (e) {
+        dot.className = 'dot off';
+        text.textContent = '未检测到服务 (请先启动服务器)';
+        btn.removeAttribute('href');
+        btn.style.opacity = '0.4';
+        btn.textContent = '请先启动服务端';
+        btn.addEventListener('click', function() { alert('请先在终端运行: cd xiuxian-server && node server.js'); });
+      }
+    })();
+  </script>
+</body>
+</html>

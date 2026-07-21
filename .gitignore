@@ -1,0 +1,6 @@
+node_modules/
+xiuxian-server/node_modules/
+xiuxian-server/data/
+xiuxian-server/test/.tmp/
+.env
+.uploads/

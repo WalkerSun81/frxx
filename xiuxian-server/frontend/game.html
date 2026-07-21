@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>凡人修仙录</title>
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    .game-screen { min-height: 100vh; min-height: 100dvh; padding: var(--sp-md); }
+    .header-bar { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-sm) var(--sp-md); background: var(--color-panel); border-radius: var(--radius-sm); margin-bottom: var(--sp-md); }
+    .realm-badge { color: var(--color-gold); font-weight: bold; font-size: var(--font-lg); }
+    .realm-small { font-size: var(--font-xs); color: var(--color-text-dim); }
+    .header-right { text-align: right; }
+    .header-right .name { font-size: var(--font-sm); color: var(--color-text); }
+    .header-right .power { font-size: var(--font-xs); color: var(--color-text-dim); }
+
+    .res-row { display: flex; gap: var(--sp-xs); margin-bottom: var(--sp-md); }
+    .res-item { flex: 1; background: var(--color-panel); border-radius: var(--radius-sm); padding: var(--sp-xs) var(--sp-sm); text-align: center; }
+    .res-item .val { font-size: var(--font-md); font-weight: bold; }
+    .res-item .lbl { font-size: var(--font-xs); color: var(--color-text-dim); }
+
+    .section-title { font-size: var(--font-sm); color: var(--color-gold); border-bottom: 1px solid var(--color-border); padding-bottom: 2px; margin-bottom: var(--sp-sm); margin-top: var(--sp-md); }
+    .section-title:first-child { margin-top: 0; }
+
+    /* 境界进度条 */
+    .realm-progress-wrap { margin-bottom: var(--sp-md); }
+    .realm-progress-bar { width: 100%; height: 14px; background: var(--color-bg-dark); border-radius: 7px; overflow: hidden; position: relative; margin-bottom: var(--sp-xs); }
+    .realm-progress-fill { height: 100%; background: linear-gradient(90deg, #8b6f2b, #d4a54a); border-radius: 7px; position: absolute; left: 0; top: 0; z-index: 2; transition: width 0.3s; }
+    .realm-progress-ghost { height: 100%; background: linear-gradient(90deg, rgba(212,165,74,0.15), rgba(212,165,74,0.35)); border-radius: 7px; position: absolute; left: 0; top: 0; z-index: 1; }
+    .realm-progress-ghost.wave { animation: realmWave 2s ease-in-out infinite; }
+    @keyframes realmWave {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+    .realm-progress-text { display: flex; justify-content: space-between; font-size: var(--font-xs); color: var(--color-text-dim); }
+
+    .attr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: var(--sp-md); }
+    .attr-cell { background: var(--color-panel); border-radius: var(--radius-sm); padding: var(--sp-xs); text-align: center; cursor: pointer; position: relative; }
+    .attr-cell .n { font-size: var(--font-xs); color: var(--color-text-dim); }
+    .attr-cell .v { font-size: var(--font-sm); color: var(--color-gold); font-weight: bold; }
+    .attr-cell.tapped { background: var(--color-gold-dim); }
+
+    .combat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-bottom: var(--sp-md); }
+    .combat-cell { background: var(--color-panel); border-radius: var(--radius-sm); padding: var(--sp-xs); text-align: center; }
+    .combat-cell .v { font-size: var(--font-md); font-weight: bold; }
+    .combat-cell .n { font-size: var(--font-xs); color: var(--color-text-dim); }
+
+    /* 灵根雷达 */
+    .radar-wrap { text-align: center; margin-bottom: var(--sp-sm); }
+    .radar-canvas { width: 55vw; height: 55vw; max-width: 200px; max-height: 200px; }
+    .element-main-info { text-align: center; margin-bottom: var(--sp-sm); }
+    .element-main { color: var(--color-gold); font-weight: bold; font-size: var(--font-sm); }
+
+    /* 命格 */
+    .talent-row { display: flex; gap: 4px; margin-bottom: var(--sp-sm); }
+    .talent-chip { flex: 1; text-align: center; background: var(--color-panel); border-radius: var(--radius-sm); padding: var(--sp-xs) 2px; border-left: 3px solid var(--q-white); }
+    .talent-chip .t-name { font-size: 8px; color: var(--color-text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .talent-chip .t-val { font-size: var(--font-sm); font-weight: bold; }
+    .talent-chip.empty { border-left-color: var(--color-border); opacity: 0.4; }
+    .fetter-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: var(--sp-sm); }
+    .fetter-tag { font-size: var(--font-xs); padding: 1px 6px; border-radius: var(--radius-sm); background: rgba(212,165,74,0.15); color: var(--color-gold); border: 1px solid var(--color-gold-dim); }
+
+    /* 修炼来源 */
+    .speed-source { font-size: var(--font-xs); color: var(--color-text-dim); margin-bottom: var(--sp-sm); }
+    .speed-source span { margin-right: var(--sp-sm); }
+
+    /* 装备精简 */
+    .equip-mini { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: var(--sp-sm); }
+    .equip-mini-slot { background: var(--color-panel); border-radius: var(--radius-sm); padding: 2px 4px; font-size: 8px; text-align: center; min-width: 36px; border: 1px dashed var(--color-border); }
+    .equip-mini-slot.filled { border-color: var(--color-gold-dim); }
+
+    /* 弹窗 */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: var(--color-panel); border: 1px solid var(--color-gold-dim); border-radius: var(--radius-md); padding: var(--sp-lg); width: 85%; max-width: 320px; max-height: 70vh; overflow-y: auto; }
+    .modal-box .m-title { font-size: var(--font-md); color: var(--color-gold); margin-bottom: var(--sp-sm); border-bottom: 1px solid var(--color-border); padding-bottom: var(--sp-xs); }
+    .modal-box .m-row { display: flex; justify-content: space-between; font-size: var(--font-sm); padding: 2px 0; }
+    .modal-box .m-row .m-src { color: var(--color-text-dim); font-size: var(--font-xs); }
+    .modal-box .m-close { display: block; width: 100%; margin-top: var(--sp-md); }
+
+    .equip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: var(--sp-md); }
+    .equip-slot { aspect-ratio: 1; background: var(--color-panel); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: var(--font-xs); color: var(--color-text-dim); border: 1px dashed var(--color-border); padding: 2px; }
+    .equip-slot.equipped { border: 1px solid var(--color-gold-dim); color: var(--color-gold); }
+    .equip-slot .eq-name { font-size: 7px; color: var(--color-text); margin-top: 1px; text-align: center; line-height: 1.1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+    .btn-row { display: flex; gap: var(--sp-xs); margin-bottom: var(--sp-md); }
+    .btn-row .btn { flex: 1; }
+
+    .map-card { padding: var(--sp-sm); background: var(--color-panel); border-radius: var(--radius-sm); margin-bottom: var(--sp-xs); display: flex; justify-content: space-between; align-items: center; }
+    .map-card .info { font-size: var(--font-sm); }
+    .map-card .prog { font-size: var(--font-xs); color: var(--color-text-dim); }
+    .battle-log { font-size: var(--font-xs); color: var(--color-text-dim); max-height: 120px; overflow-y: auto; background: var(--color-bg-dark); border-radius: var(--radius-sm); padding: var(--sp-xs); margin-bottom: var(--sp-md); }
+    .battle-log .crit { color: #ff9800; font-weight: bold; }
+
+    .bottom-tabs { display: flex; gap: var(--sp-xs); margin-top: var(--sp-md); position: sticky; bottom: 0; background: var(--color-bg-dark); padding: var(--sp-sm) 0; padding-bottom: env(safe-area-inset-bottom, var(--sp-sm)); }
+    .tab-btn { flex: 1; padding: var(--sp-sm); background: var(--color-panel); border: none; border-radius: var(--radius-sm); color: var(--color-text-dim); font-size: var(--font-md); font-weight: bold; cursor: pointer; text-align: center; min-height: 2.4rem; }
+    .tab-btn.active { background: var(--color-gold); color: #1a1a2e; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .q-1 { color: var(--q-white); }
+    .q-2 { color: var(--q-green); }
+    .q-3 { color: var(--q-blue); }
+    .q-4 { color: var(--q-purple); }
+    .q-5 { color: var(--q-orange); }
+    .q-6 { color: var(--q-red); }
+    .talent-chip.q-1 { border-left-color: var(--q-white); }
+    .talent-chip.q-2 { border-left-color: var(--q-green); }
+    .talent-chip.q-3 { border-left-color: var(--q-blue); }
+    .talent-chip.q-4 { border-left-color: var(--q-purple); }
+    .talent-chip.q-5 { border-left-color: var(--q-orange); }
+    .talent-chip.q-6 { border-left-color: var(--q-red); }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="game-screen" id="app">
+      <!-- Header -->
+      <div class="header-bar">
+        <div>
+          <div class="realm-badge" id="realmName">—</div>
+          <div class="realm-small" id="realmSub">—</div>
+        </div>
+        <div class="header-right">
+          <div class="name" id="roleName">—</div>
+          <div class="power">战力 <span class="text-gold" id="power">0</span></div>
+        </div>
+      </div>
+
+      <!-- 资源 -->
+      <div class="res-row">
+        <div class="res-item"><div class="val text-gold" id="goldVal">0</div><div class="lbl">灵石</div></div>
+        <div class="res-item"><div class="val" id="copperVal">0</div><div class="lbl">铜板</div></div>
+        <div class="res-item"><div class="val" id="enhanceStone">0</div><div class="lbl">强化石</div></div>
+      </div>
+
+      <!-- TAB 1: 角色 -->
+      <div class="tab-content active" id="tabRole">
+
+        <!-- 境界进度条 -->
+        <div class="section-title">境界修为</div>
+        <div class="realm-progress-wrap">
+          <div class="realm-progress-bar">
+            <div class="realm-progress-fill" id="realmProgressFill" style="width:0%"></div>
+            <div class="realm-progress-ghost" id="realmProgressGhost" style="width:100%"></div>
+          </div>
+          <div class="realm-progress-text">
+            <span id="realmProgressTxt">0 / 0</span><span id="realmPct">0%</span>
+          </div>
+        </div>
+        <div class="text-xs text-center text-dim" id="realmNextHint">—</div>
+
+        <!-- 修炼状态 -->
+        <div class="section-title">修炼</div>
+        <div class="speed-source">
+          每秒: <span class="text-gold" id="speedVal">1.0</span> 修为
+          <span id="speedDetail" class="text-dim" style="margin-left:4px;font-size:7px"></span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnCultivate">×10 (+<span id="cultivateGain">10</span>)</button>
+          <button class="btn" id="btnAutoCultivate" style="background:var(--color-gold);color:#1a1a2e;">×10加速 <span id="autoStatus">▶</span></button>
+        </div>
+        <div class="text-xs text-center text-dim" style="margin-bottom:var(--sp-sm)" id="breakHint">—</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btnBreakthrough" disabled>境界突破</button>
+        </div>
+
+        <!-- 基础属性 -->
+        <div class="section-title">基础属性</div>
+        <div class="attr-grid" id="attrGrid"></div>
+
+        <!-- 战斗属性 -->
+        <div class="section-title">战斗属性</div>
+        <div class="combat-grid" id="combatRow"></div>
+
+        <!-- 灵根雷达 -->
+        <div class="section-title">灵根</div>
+        <div class="radar-wrap"><canvas class="radar-canvas" id="radarCanvas"></canvas></div>
+        <div class="element-main-info">
+          <span class="element-main" id="mainElementTxt">—</span>
+          <span style="margin-left:6px;font-size:var(--font-xs);color:var(--color-text-dim)" id="elementMult">—</span>
+        </div>
+
+        <!-- 命格 + 羁绊 -->
+        <div class="section-title">命格</div>
+        <div class="talent-row" id="talentRow"><div class="text-xs text-dim">—</div></div>
+        <div class="fetter-row" id="fetterRow"></div>
+
+        <!-- 装备精简 -->
+        <div class="section-title">装备</div>
+        <div class="equip-mini" id="equipMini"></div>
+
+        <!-- 属性详情弹窗 -->
+        <div class="modal-overlay" id="attrModal">
+          <div class="modal-box">
+            <div class="m-title" id="attrModalTitle"></div>
+            <div id="attrModalDetail"></div>
+            <button class="btn btn-ghost m-close" id="attrModalClose">关闭</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: 战斗 -->
+      <div class="tab-content" id="tabBattle">
+        <div class="section-title">地图</div>
+        <div id="mapList"></div>
+        <div class="battle-log" id="battleLog" style="display:none"></div>
+        <div class="section-title" id="battleTitle" style="display:none">战斗</div>
+        <div class="btn-row" id="battleBtns" style="display:none">
+          <button class="btn btn-primary" id="btnChallenge">挑战当前层</button>
+        </div>
+        <div class="text-xs text-center text-dim" id="mapHint">选择地图开始战斗</div>
+      </div>
+
+      <!-- TAB 3: 装备 -->
+      <div class="tab-content" id="tabEquip">
+        <div class="section-title">装备栏</div>
+        <div class="equip-grid" id="equipGrid"></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btnOfflineClaim">领取离线收益</button>
+        </div>
+        <div class="section-title">背包</div>
+        <div id="bagList"><div class="text-dim text-sm text-center">暂无装备</div></div>
+      </div>
+
+      <!-- TAB 4: 商店 -->
+      <div class="tab-content" id="tabShop">
+        <div class="section-title">坊市</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnBuyStone">强化石x10 (100灵石)</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btnBuyPill">修为丹x1 (500灵石)</button>
+        </div>
+      </div>
+
+      <!-- 底部标签 -->
+      <div class="bottom-tabs">
+        <button class="tab-btn active" data-tab="tabRole">角色</button>
+        <button class="tab-btn" data-tab="tabBattle">战斗</button>
+        <button class="tab-btn" data-tab="tabEquip">装备</button>
+        <button class="tab-btn" data-tab="tabShop">商城</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    (function () {
+      UI.lockOrientation();
+      if (!API.getToken()) { window.location.href = '/'; return; }
+      const roleId = UI.getParam('role_id');
+      if (!roleId) { window.location.href = '/'; return; }
+      const Q = function(id) { return document.getElementById(id); };
+
+      // WebSocket
+      (function connectWS() {
+        var wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/?role_id=' + roleId + '&token=' + encodeURIComponent(API.getToken() || '');
+        try {
+          var ws = new WebSocket(wsUrl);
+          ws.onmessage = function(e) {
+            try { var m = JSON.parse(e.data); if (m.push_cmd === 9002 || m.push_cmd === 9001) refreshRole(); } catch(_) {}
+          };
+          ws.onclose = function() { setTimeout(connectWS, 5000); };
+        } catch(_) { setTimeout(connectWS, 5000); }
+      })();
+
+      // TAB
+      var currentTab = 'tabRole';
+      function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+        document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
+        Q(tabId).classList.add('active');
+        var btn = document.querySelector('[data-tab="' + tabId + '"]');
+        if (btn) btn.classList.add('active');
+        currentTab = tabId;
+        if (tabId === 'tabBattle') loadMaps();
+        if (tabId === 'tabEquip') refreshEquip();
+        if (tabId === 'tabRole') refreshRole();
+      }
+      document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { switchTab(btn.dataset.tab); });
+      });
+
+      var QUALITY = ['', '普通', '优秀', '精良', '史诗', '传说', '神话'];
+      var QUALITY_CLASS = ['', 'q-1', 'q-2', 'q-3', 'q-4', 'q-5', 'q-6'];
+      var SLOT_NAMES = ['', '武器', '衣服', '帽子', '手套', '鞋子', '项链', '戒指1', '戒指2', '法宝1', '法宝2', '法宝3'];
+      var SLOT_SHORT = ['', '武', '衣', '帽', '手', '鞋', '链', '戒', '戒', '宝', '宝', '宝'];
+      var ELEM_NAMES = ['金', '木', '水', '火', '土'];
+
+      // ====== 数据缓存 ======
+      var cachedInfo = null;
+      var tickTimer = null;        // 每秒基础修为自动累加
+      var autoTimer = null;        // 10倍加速自动修炼
+      var autoRunning = false;
+
+      function refreshInfo() {
+        return API.getRoleInfo(roleId).then(function(r) {
+          if (r.code !== 0) return null;
+          cachedInfo = r.data;
+          return cachedInfo;
+        });
+      }
+
+      function refreshRole() {
+        return refreshInfo().then(function(data) {
+          if (data) renderRole(data);
+        });
+      }
+
+      function renderRole(d) {
+        // Header
+        Q('realmName').textContent = d.basic.realm_name;
+        Q('realmSub').textContent = '第' + (d.basic.realm_sub_level || 1) + '层';
+        Q('roleName').textContent = d.basic.name;
+        Q('power').textContent = d.basic.combat_power;
+        Q('goldVal').textContent = d.resources.gold;
+        Q('copperVal').textContent = d.resources.copper;
+        Q('enhanceStone').textContent = d.resources.enhance_stone || 0;
+
+        // 境界进度条
+        var exp = d.basic.cultivate_exp;
+        var expNext = d.basic.cultivate_exp_to_next;
+        var pct = Math.min(100, Math.floor(exp / expNext * 100));
+        // 实心已完成部分
+        Q('realmProgressFill').style.width = pct + '%';
+        // 半透明波动条：从完成位置到100%，覆盖剩余空间
+        var ghost = Q('realmProgressGhost');
+        ghost.style.left = pct + '%';
+        ghost.style.width = (100 - pct) + '%';
+        if (pct < 100) ghost.classList.add('wave'); else ghost.classList.remove('wave');
+        Q('realmProgressTxt').textContent = exp.toLocaleString() + ' / ' + expNext.toLocaleString();
+        Q('realmPct').textContent = pct + '%';
+        var realmIdx = d.basic.realm_level;
+        var realmNames = ['凡人','练气初期','练气中期','练气后期','练气圆满','筑基初期','筑基中期','筑基后期','筑基圆满',
+          '金丹初期','金丹中期','金丹后期','金丹圆满','元婴初期','元婴中期','元婴后期','元婴圆满',
+          '化神初期','化神中期','化神后期','化神圆满','炼虚初期','炼虚中期','炼虚后期','炼虚圆满',
+          '合道初期','合道中期','合道后期','合道圆满','大乘初期','大乘中期','大乘后期','大乘圆满',
+          '渡劫初期','渡劫中期','渡劫后期','渡劫圆满'];
+        var nextRealmName = realmIdx < 36 ? realmNames[realmIdx + 1] : '飞升';
+        Q('realmNextHint').textContent = '下一境界: ' + nextRealmName;
+
+        // 修炼速度 = cultivation_speed（已乘基础1.0，即每秒修为值）
+        var cultivateSpeed = d.attributes.cultivation_speed || 1;
+        var perSec = Math.round(cultivateSpeed * 10) / 10;    // 基础：每秒修为
+        var perClick = Math.floor(cultivateSpeed * 10);        // 手动：×10
+
+        Q('speedVal').textContent = perSec.toFixed(1);
+        Q('speedDetail').textContent = '';
+        Q('cultivateGain').textContent = perClick;
+
+        // 基础属性
+        var attrs = [['力量','strength'],['体魄','vitality'],['敏捷','agility'],['灵力','intelligence'],
+                     ['精准','accuracy'],['神识','sense'],['悟性','wisdom'],['气运','luck']];
+        Q('attrGrid').innerHTML = attrs.map(function(a) {
+          return '<div class="attr-cell" data-attr="' + a[1] + '"><div class="n">' + a[0] + '</div><div class="v">' + d.attributes[a[1]] + '</div></div>';
+        }).join('');
+
+        // 点击属性弹窗
+        document.querySelectorAll('.attr-cell').forEach(function(cell) {
+          cell.addEventListener('click', function() {
+            showAttrModal(cell.dataset.attr, d);
+          });
+        });
+
+        // 战斗属性
+        var combat = [
+          ['物理攻击', d.attributes.physical_attack],
+          ['物理防御', d.attributes.physical_defense],
+          ['法术攻击', d.attributes.magical_attack],
+          ['法术防御', d.attributes.magical_defense],
+          ['气血', d.attributes.hp],
+          ['魔法', d.attributes.mp],
+          ['暴击率', (d.attributes.crit_rate * 100).toFixed(1) + '%'],
+          ['暴伤', d.attributes.crit_damage.toFixed(1)],
+          ['闪避率', (d.attributes.dodge_rate * 100).toFixed(1) + '%'],
+          ['命中率', (d.attributes.hit_rate * 100).toFixed(1) + '%'],
+          ['攻击速度', '×' + d.attributes.attack_speed],
+          ['修炼速度', '×' + cultivateSpeed.toFixed(1)]
+        ];
+        Q('combatRow').innerHTML = combat.map(function(c) {
+          return '<div class="combat-cell"><div class="v">' + c[1] + '</div><div class="n">' + c[0] + '</div></div>';
+        }).join('');
+
+        // 灵根雷达
+        if (d.element_root) {
+          drawRadar(d.element_root);
+          Q('mainElementTxt').textContent = '主灵根: ' + ELEM_NAMES[d.element_root.main_element - 1];
+          Q('elementMult').textContent = '修炼倍率 ×' + d.element_root.cultivate_multiplier;
+        }
+
+        // 命格
+        if (d.talents && d.talents.length > 0) {
+          Q('talentRow').innerHTML = d.talents.map(function(t) {
+            return '<div class="talent-chip ' + QUALITY_CLASS[t.quality] + '"><div class="t-name">' + (t.talent_name || '—') + '</div><div class="t-val">+' + t.value + '</div></div>';
+          }).join('');
+          // 计算羁绊
+          var fetters = calcFetters(d.talents);
+          Q('fetterRow').innerHTML = fetters.length > 0 ? fetters.map(function(f) {
+            return '<span class="fetter-tag">' + f.category + '·' + f.name + ': ' + f.effect + '</span>';
+          }).join('') : '<span class="text-xs text-dim">无激活羁绊</span>';
+        } else {
+          Q('talentRow').innerHTML = [0,1,2,3,4].map(function(i) {
+            return '<div class="talent-chip empty"><div class="t-name">槽' + (i+1) + '</div><div class="t-val">—</div></div>';
+          }).join('');
+          Q('fetterRow').innerHTML = '<span class="text-xs text-dim">无激活羁绊</span>';
+        }
+
+        // 装备精简
+        var equipped = {};
+        if (d.equipment) d.equipment.forEach(function(e) { equipped[e.slot_type] = e; });
+        Q('equipMini').innerHTML = SLOT_SHORT.slice(1, 9).map(function(name, i) {
+          var slot = i + 1;
+          var eq = equipped[slot];
+          if (eq) return '<div class="equip-mini-slot filled ' + QUALITY_CLASS[eq.quality] + '">' + name + '<br>+' + eq.level + '</div>';
+          return '<div class="equip-mini-slot">' + name + '</div>';
+        }).join('');
+
+        // 突破按钮
+        var canBreak = exp >= expNext;
+        Q('btnBreakthrough').disabled = !canBreak;
+        Q('breakHint').textContent = canBreak ? '修为已满，可以突破！' : '还需 ' + (expNext - exp).toLocaleString() + ' 修为';
+      }
+
+      // ====== 灵根雷达 ======
+      function drawRadar(e) {
+        var canvas = Q('radarCanvas');
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var w = rect.width, h = rect.height, cx = w / 2, cy = h / 2, r = Math.min(w, h) * 0.34;
+        var labels = ['金', '木', '水', '火', '土'];
+        var values = [e.metal || 0, e.wood || 0, e.water || 0, e.fire || 0, e.earth || 0];
+        var maxVal = Math.max.apply(null, values.concat([50]));
+
+        // BG rings
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        for (var i = 1; i <= 3; i++) {
+          ctx.beginPath();
+          for (var j = 0; j < 5; j++) {
+            var a = -Math.PI / 2 + (Math.PI * 2 / 5) * j;
+            var x = cx + Math.cos(a) * r * (i / 3), y = cy + Math.sin(a) * r * (i / 3);
+            if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.closePath(); ctx.stroke();
+        }
+        // Axes
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        for (var j2 = 0; j2 < 5; j2++) {
+          var a2 = -Math.PI / 2 + (Math.PI * 2 / 5) * j2;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a2) * r, cy + Math.sin(a2) * r);
+          ctx.stroke();
+        }
+        // Data
+        ctx.fillStyle = 'rgba(212,165,74,0.25)';
+        ctx.strokeStyle = '#d4a54a';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (var j3 = 0; j3 < 5; j3++) {
+          var a3 = -Math.PI / 2 + (Math.PI * 2 / 5) * j3;
+          var ratio = maxVal > 0 ? values[j3] / maxVal : 0;
+          var x3 = cx + Math.cos(a3) * r * ratio;
+          var y3 = cy + Math.sin(a3) * r * ratio;
+          if (j3 === 0) ctx.moveTo(x3, y3); else ctx.lineTo(x3, y3);
+        }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Labels
+        ctx.fillStyle = '#e0d5c1';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        for (var j4 = 0; j4 < 5; j4++) {
+          var a4 = -Math.PI / 2 + (Math.PI * 2 / 5) * j4;
+          ctx.fillText(labels[j4], cx + Math.cos(a4) * r * 1.15, cy + Math.sin(a4) * r * 1.15 + 3);
+        }
+        var sum = values.reduce(function(a, b) { return a + b; }, 0);
+        ctx.fillStyle = '#d4a54a';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText(sum, cx, cy + 4);
+      }
+
+      // ====== 羁绊计算 ======
+      function calcFetters(talents) {
+        var fet = [];
+        var qualities = talents.map(function(t) { return t.quality; });
+        var types = talents.map(function(t) { return t.talent_type; });
+        if (new Set(qualities).size === 5) fet.push({ name: '五彩斑斓', category: '天道', effect: '全属性+5%' });
+        if (qualities.every(function(q) { return q === qualities[0]; })) fet.push({ name: '五行归一', category: '天道', effect: '修炼+15%' });
+        if (qualities.indexOf(1) >= 0 && (qualities.indexOf(5) >= 0 || qualities.indexOf(6) >= 0))
+          fet.push({ name: '道法自然', category: '天道', effect: '修炼+10%' });
+        if (qualities.filter(function(q) { return q >= 4; }).length >= 3) fet.push({ name: '紫气东来', category: '地道', effect: '暴击+5%,全属性+2%' });
+        if (qualities.filter(function(q) { return q <= 2; }).length >= 3) fet.push({ name: '草根崛起', category: '地道', effect: '气血+10%,防御+8%' });
+        if (types.filter(function(t) { return t === 1; }).length >= 3) fet.push({ name: '战意凝形', category: '人道', effect: '攻击+8%,暴击+5%' });
+        if (types.filter(function(t) { return t === 3; }).length >= 3) fet.push({ name: '道法精修', category: '人道', effect: '修炼+8%,悟性+6%' });
+        if (types.filter(function(t) { return t === 4; }).length >= 3) fet.push({ name: '命运之子', category: '人道', effect: '气运+8%' });
+        if (types.filter(function(t) { return t === 2 || t === 5; }).length >= 3) fet.push({ name: '不动如山', category: '人道', effect: '气血+8%,防御+6%' });
+        return fet;
+      }
+
+      // ====== 属性详情弹窗 ======
+      var ATTR_SOURCE = {
+        strength: { name: '力量', effect: '提升物理攻击' },
+        vitality: { name: '体魄', effect: '提升气血、物理防御' },
+        agility: { name: '敏捷', effect: '提升出手速度、闪避' },
+        intelligence: { name: '灵力', effect: '提升法术攻击、魔法上限' },
+        accuracy: { name: '精准', effect: '提升命中率' },
+        sense: { name: '神识', effect: '提升暴击率' },
+        wisdom: { name: '悟性', effect: '提升修炼速度' },
+        luck: { name: '气运', effect: '提升掉落、暴击伤害' }
+      };
+      function showAttrModal(attrKey, d) {
+        var info = ATTR_SOURCE[attrKey] || { name: attrKey, effect: '' };
+        Q('attrModalTitle').textContent = info.name + ': ' + d.attributes[attrKey];
+
+        var html = '';
+        html += '<div class="m-row"><span>境界基础</span><span>+' + getRealmBase(attrKey, d.basic.realm_level) + '</span></div>';
+        html += '<div class="m-src">来源: 境界成长累加</div>';
+
+        // 命格加成
+        var talentBonus = 0;
+        if (d.talents) {
+          d.talents.forEach(function(t) {
+            var mapped = typeToAttr(t.talent_type);
+            if (mapped === attrKey) talentBonus += t.value;
+          });
+        }
+        if (talentBonus > 0) {
+          html += '<div class="m-row"><span>命格加成</span><span>+' + talentBonus + '</span></div>';
+          html += '<div class="m-src">来源: 天赋属性</div>';
+        }
+
+        // 装备加成
+        var equipBonus = 0;
+        if (d.equipment) {
+          d.equipment.forEach(function(e) {
+            if (e.base_attrs) {
+              try {
+                var ba = typeof e.base_attrs === 'string' ? JSON.parse(e.base_attrs) : e.base_attrs;
+                if (ba[attrKey]) equipBonus += ba[attrKey];
+              } catch(ignore) {}
+            }
+          });
+        }
+        if (equipBonus > 0) {
+          html += '<div class="m-row"><span>装备加成</span><span>+' + equipBonus + '</span></div>';
+          html += '<div class="m-src">来源: 穿戴装备</div>';
+        }
+
+        html += '<div class="m-row" style="margin-top:6px;border-top:1px solid var(--color-border);padding-top:4px"><span>效果</span><span>' + info.effect + '</span></div>';
+        Q('attrModalDetail').innerHTML = html;
+        Q('attrModal').classList.add('show');
+      }
+
+      function getRealmBase(attrKey, realmLevel) {
+        var base = { strength: 5, vitality: 8, agility: 3, intelligence: 2, accuracy: 3, sense: 2, wisdom: 5, luck: 3 };
+        var perLevel = { strength: 5, vitality: 8, agility: 3, intelligence: 3, accuracy: 3, sense: 3, wisdom: 3, luck: 1 };
+        return (base[attrKey] || 0) + (perLevel[attrKey] || 0) * realmLevel;
+      }
+
+      function typeToAttr(type) {
+        var map = { 1: 'strength', 2: 'vitality', 3: 'wisdom', 4: 'luck', 5: 'vitality', 6: 'sense' };
+        return map[type] || null;
+      }
+
+      Q('attrModalClose').addEventListener('click', function() {
+        Q('attrModal').classList.remove('show');
+      });
+      Q('attrModal').addEventListener('click', function(e) {
+        if (e.target === Q('attrModal')) Q('attrModal').classList.remove('show');
+      });
+
+      // ====== 自动计时 ======
+      function updateProgressUI(exp, expNext) {
+        if (!expNext) return;
+        var pct = Math.min(100, Math.floor(exp / expNext * 100));
+        Q('realmProgressFill').style.width = pct + '%';
+        var ghost = Q('realmProgressGhost');
+        ghost.style.left = pct + '%';
+        ghost.style.width = (100 - pct) + '%';
+        if (pct >= 100) ghost.classList.remove('wave'); else ghost.classList.add('wave');
+        Q('realmProgressTxt').textContent = exp.toLocaleString() + ' / ' + expNext.toLocaleString();
+        Q('realmPct').textContent = pct + '%';
+        Q('expVal').textContent = exp + '/' + expNext;
+        var canBreak = exp >= expNext;
+        Q('btnBreakthrough').disabled = !canBreak;
+        Q('breakHint').textContent = canBreak ? '修为已满，可以突破！' : '还需 ' + (expNext - exp).toLocaleString() + ' 修为';
+      }
+
+      // 基础计时：每秒 +1 倍基础速度
+      function startTick() {
+        if (tickTimer) clearInterval(tickTimer);
+        tickTimer = setInterval(function() {
+          if (autoRunning) return; // ×10加速开启时不重复
+          API.tick(roleId).then(function(r) {
+            if (!r || r.code !== 0) return;
+            if (cachedInfo) cachedInfo.basic.cultivate_exp = r.data.cultivate_exp;
+            updateProgressUI(r.data.cultivate_exp, r.data.cultivate_exp_to_next);
+          });
+        }, 1000);
+      }
+
+      // ×10加速：切换开关
+      Q('btnAutoCultivate').addEventListener('click', function() {
+        if (autoRunning) { stopAuto(); } else { startAuto(); }
+      });
+
+      function startAuto() {
+        autoRunning = true;
+        Q('autoStatus').textContent = '■';
+        Q('btnAutoCultivate').style.background = '#d44a4a';
+        Q('btnAutoCultivate').style.color = '#fff';
+        function tick() {
+          if (!autoRunning) return;
+          API.autoCultivate(roleId).then(function(r) {
+            if (!r || r.code !== 0) return;
+            if (cachedInfo) cachedInfo.basic.cultivate_exp = r.data.cultivate_exp;
+            updateProgressUI(r.data.cultivate_exp, r.data.cultivate_exp_to_next);
+          });
+        }
+        tick();
+        autoTimer = setInterval(tick, 1000);
+      }
+
+      function stopAuto() {
+        autoRunning = false;
+        if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+        Q('autoStatus').textContent = '▶';
+        Q('btnAutoCultivate').style.background = 'var(--color-gold)';
+        Q('btnAutoCultivate').style.color = '#1a1a2e';
+      }
+
+      // ====== 修炼 / 突破 ======
+      Q('btnCultivate').addEventListener('click', async function() {
+        Q('btnCultivate').disabled = true;
+        await API.cultivate(roleId);
+        Q('btnCultivate').disabled = false;
+        refreshRole();
+      });
+      Q('btnBreakthrough').addEventListener('click', async function() {
+        var r = await API.breakthrough(roleId);
+        if (r.code !== 0) { UI.toast(r.msg); return; }
+        UI.toast(r.data.success ? '突破成功！' + r.data.new_realm_name + '！' : '突破失败，修为损失20%');
+        refreshRole();
+      });
+
+      // 离线收益
+      Q('btnOfflineClaim').addEventListener('click', async function() {
+        var r = await API.offlineReward(roleId);
+        if (r.code === 0 && r.data.cultivate_gain > 0) {
+          UI.toast('离线修炼获得 ' + r.data.cultivate_gain.toLocaleString() + ' 修为 + ' + (r.data.gold_gain || 0).toLocaleString() + ' 灵石');
+        } else if (r.code === 0) {
+          UI.toast('暂无离线收益');
+        } else {
+          UI.toast(r.msg);
+        }
+        refreshRole();
+      });
+      // 初始加载时自动结算
+      (function() {
+        API.offlineReward(roleId).then(function(r) {
+          if (r.code === 0 && r.data.cultivate_gain > 0) {
+            UI.toast('离线修炼获得 ' + r.data.cultivate_gain.toLocaleString() + ' 修为 + ' + (r.data.gold_gain || 0).toLocaleString() + ' 灵石');
+          }
+        });
+      })();
+
+      // ====== 战斗 ======
+      var selectedMap = 1, selectedLayer = 1;
+      function loadMaps() {
+        API.battleMaps(roleId).then(function(r) {
+          if (r.code !== 0) return;
+          Q('mapList').innerHTML = r.data.maps.map(function(m) {
+            var unlocked = cachedInfo && cachedInfo.basic.realm_level >= m.unlockRealm;
+            return '<div class="map-card" data-map="' + m.map_id + '"><div><div class="info">' + m.name + ' ' + (unlocked ? '' : '<span class="text-dim text-xs">(未解锁)</span>') + '</div><div class="prog">' + (unlocked ? '进度: ' + m.max_layer + '/' + m.layers + '层' : '境界不足') + '</div></div><button class="btn btn-ghost btn-sm"' + (!unlocked ? ' disabled' : '') + '>选择</button></div>';
+          }).join('');
+
+          document.querySelectorAll('.map-card').forEach(function(card) {
+            var mapId = parseInt(card.dataset.map);
+            card.querySelector('button').addEventListener('click', function() {
+              selectedMap = mapId;
+              var mapData = r.data.maps.find(function(m) { return m.map_id === mapId; });
+              selectedLayer = (mapData ? mapData.max_layer : 0) + 1;
+              Q('battleTitle').style.display = 'block';
+              Q('battleTitle').textContent = (mapData ? mapData.name : '') + ' 第' + selectedLayer + '层';
+              Q('battleBtns').style.display = 'flex';
+              Q('mapHint').style.display = 'none';
+              Q('battleLog').style.display = 'none';
+            });
+          });
+        });
+      }
+      Q('btnChallenge').addEventListener('click', async function() {
+        Q('btnChallenge').disabled = true;
+        var r = await API.challenge(roleId, selectedMap, selectedLayer);
+        Q('btnChallenge').disabled = false;
+        if (r.code !== 0) { UI.toast(r.msg); return; }
+        var html = '';
+        (r.data.log || []).forEach(function(l) {
+          if (l.attacker === '玩家') {
+            html += '<div>第' + l.round + '回合: 你造成 <span class="crit">' + l.damage + '</span> 伤害' + (l.isCrit ? ' <b>暴击!</b>' : '') + ' | 怪物剩余 ' + l.monsterHp + '</div>';
+          } else {
+            html += '<div>第' + l.round + '回合: ' + l.attacker + ' 造成 <span>' + l.damage + '</span> 伤害 | 你剩余 ' + l.playerHp + '</div>';
+          }
+        });
+        Q('battleLog').innerHTML = html;
+        Q('battleLog').style.display = 'block';
+        if (r.data.result === 'win') {
+          UI.toast('胜利！获得 ' + r.data.rewards.exp + ' 修为 + ' + r.data.rewards.gold + ' 灵石' + (r.data.rewards.equipment ? ' + 装备！' : ''));
+          selectedLayer++;
+          Q('battleTitle').textContent += ' → 第' + selectedLayer + '层';
+        } else if (r.data.result === 'lose') {
+          UI.toast('战败... ' + r.data.rewards.exp + ' 修为');
+        }
+        refreshRole();
+      });
+
+      // ====== 装备 ======
+      function refreshEquip() {
+        refreshInfo().then(function() {
+          var d = cachedInfo;
+          if (!d) return;
+          var equipped = {};
+          (d.equipment || []).forEach(function(e) { equipped[e.slot_type] = e; });
+          Q('equipGrid').innerHTML = SLOT_NAMES.slice(1).map(function(name, i) {
+            var slot = i + 1;
+            var eq = equipped[slot];
+            if (eq) return '<div class="equip-slot equipped" data-slot="' + slot + '"><div class="text-xs">' + name + '</div><div class="eq-name ' + QUALITY_CLASS[eq.quality] + '">' + eq.template_name + ' +' + eq.level + '</div></div>';
+            return '<div class="equip-slot" data-slot="' + slot + '"><div class="text-xs">' + name + '</div></div>';
+          }).join('');
+          renderBag(d);
+        });
+      }
+
+      function renderBag(d) {
+        var bagItems = (d.equipment || []).filter(function(e) { return e.slot_type === 0; });
+        if (bagItems.length > 0) {
+          Q('bagList').innerHTML = bagItems.map(function(e) {
+            return '<div class="map-card"><div><div class="' + QUALITY_CLASS[e.quality] + '">' + e.template_name + ' +' + e.level + '</div><div class="text-xs text-dim">' + QUALITY[e.quality] + '</div></div><button class="btn btn-ghost btn-sm equip-btn" data-eid="' + e.id + '">穿戴</button></div>';
+          }).join('');
+          document.querySelectorAll('.equip-btn').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+              var eid = parseInt(btn.dataset.eid);
+              var slotStr = prompt('穿到哪个槽位？(1武器 2衣服 3帽子 4手套 5鞋子 6项链 7戒指1 8戒指2 9-11法宝)');
+              var slot = parseInt(slotStr);
+              if (!slot || slot < 1 || slot > 11) { UI.toast('无效槽位'); return; }
+              var r2 = await API.equipItem(eid, slot);
+              if (r2.code !== 0) { UI.toast(r2.msg); return; }
+              UI.toast('穿戴成功！');
+              refreshEquip();
+            });
+          });
+          document.querySelectorAll('.equip-slot.equipped').forEach(function(slotEl) {
+            slotEl.addEventListener('click', async function() {
+              var slot = parseInt(slotEl.dataset.slot);
+              var eq = equippedForSlot(slot);
+              if (!eq) return;
+              if (confirm('强化 ' + eq.template_name + '？消耗铜板')) {
+                var r3 = await API.enhanceItem(eq.id);
+                if (r3.code !== 0) { UI.toast(r3.msg); return; }
+                UI.toast(r3.data.success ? '强化成功！+' + r3.data.new_level : '强化失败…降至+' + r3.data.new_level);
+                refreshEquip();
+              }
+            });
+          });
+        } else {
+          Q('bagList').innerHTML = '<div class="text-dim text-sm text-center">暂无装备，去战斗获取吧</div>';
+        }
+      }
+      function equippedForSlot(slot) {
+        if (!cachedInfo || !cachedInfo.equipment) return null;
+        return cachedInfo.equipment.find(function(e) { return e.slot_type === slot; }) || null;
+      }
+
+      // ====== 商店 ======
+      Q('btnBuyStone').addEventListener('click', async function() {
+        var r = await API.shopBuy(roleId, 'enhance_stone_10', 1);
+        if (r.code !== 0) { UI.toast(r.msg); return; }
+        UI.toast('购买成功！');
+        refreshRole();
+      });
+      Q('btnBuyPill').addEventListener('click', async function() {
+        var r = await API.shopBuy(roleId, 'cultivate_book_1', 1);
+        if (r.code !== 0) { UI.toast(r.msg); return; }
+        UI.toast('购买成功！');
+        refreshRole();
+      });
+
+      // ====== 启动 ======
+      refreshRole().then(function() { startTick(); });
+    })();
+  </script>
+</body>
+</html>

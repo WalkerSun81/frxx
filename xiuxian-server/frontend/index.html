@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>凡人修仙录</title>
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    .welcome-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: var(--sp-2xl);
+      text-align: center;
+    }
+    .welcome-logo {
+      font-size: 2.8rem;
+      margin-bottom: var(--sp-sm);
+    }
+    .welcome-title {
+      font-size: var(--font-3xl);
+      color: var(--color-gold);
+      letter-spacing: 0.3em;
+    }
+    .welcome-subtitle {
+      font-size: var(--font-sm);
+      color: var(--color-text-dim);
+      margin-top: var(--sp-xs);
+      margin-bottom: var(--sp-2xl);
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      padding: var(--sp-sm) var(--sp-lg);
+      background: var(--color-panel);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-sm);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #666;
+    }
+    .status-dot.ok { background: var(--color-success); }
+    .status-dot.err { background: var(--color-danger); }
+    .welcome-btn {
+      width: 100%;
+      max-width: 260px;
+      padding: var(--sp-md);
+      font-size: var(--font-lg);
+      letter-spacing: 0.15em;
+      margin-top: var(--sp-xl);
+    }
+    .welcome-footer {
+      font-size: var(--font-xs);
+      color: var(--color-text-dark);
+      margin-top: var(--sp-xl);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="welcome-screen" id="welcomeScreen">
+      <div class="welcome-logo">&#x2694;</div>
+      <div class="welcome-title">凡人修仙录</div>
+      <div class="welcome-subtitle">文字挂机修仙 RPG</div>
+
+      <div class="status-row">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">正在连接...</span>
+      </div>
+
+      <button class="btn btn-primary welcome-btn" id="btnEnter" disabled>
+        踏入仙途
+      </button>
+
+      <div class="welcome-footer">v0.1</div>
+    </div>
+  </div>
+
+  <script src="js/ui.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    (async function () {
+      UI.lockOrientation();
+
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const btnEnter = document.getElementById('btnEnter');
+
+      function setStatus(ok, msg) {
+        statusDot.className = 'status-dot ' + (ok ? 'ok' : 'err');
+        statusText.textContent = msg;
+      }
+
+      // 1. 检测后端
+      try {
+        const health = await API.health();
+        if (health.code !== 0) { setStatus(false, '服务器异常'); return; }
+      } catch (e) {
+        setStatus(false, '无法连接到服务器');
+        return;
+      }
+
+      // 2. 游客登录
+      let deviceId = localStorage.getItem('xiuxian_device_id');
+      if (!deviceId) {
+        deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        localStorage.setItem('xiuxian_device_id', deviceId);
+      }
+
+      try {
+        const loginResp = await API.login(deviceId);
+        if (loginResp.code === 0) {
+          API.setToken(loginResp.data.token);
+          const roles = loginResp.data.roles || [];
+          setStatus(true, roles.length ? `欢迎回来，${roles.length} 个角色` : '新道友，请先创建角色');
+
+          btnEnter.disabled = false;
+          btnEnter.onclick = () => {
+            if (roles.length) {
+              window.location.href = `/game.html?role_id=${roles[0].role_id}`;
+            } else {
+              window.location.href = '/create.html';
+            }
+          };
+        } else {
+          setStatus(false, '登录失败');
+        }
+      } catch (e) {
+        setStatus(false, '网络异常');
+      }
+    })();
+  </script>
+</body>
+</html>
