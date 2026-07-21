@@ -259,6 +259,36 @@ async function initTables() {
     )`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_map_role ON t_map_progress(role_id, map_id)`,
 
+    `CREATE TABLE IF NOT EXISTS t_battle_build (
+      role_id INTEGER PRIMARY KEY,
+      strategy TEXT NOT NULL DEFAULT 'attack',
+      skills TEXT NOT NULL DEFAULT '["metal_edge","wood_recovery","stone_skin"]',
+      update_time DATETIME DEFAULT (datetime('now','localtime')),
+      FOREIGN KEY (role_id) REFERENCES t_role(id)
+    )`,
+
+    `CREATE TABLE IF NOT EXISTS t_game_event (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      role_id INTEGER NOT NULL,
+      event_name TEXT NOT NULL,
+      event_data TEXT,
+      create_time DATETIME DEFAULT (datetime('now','localtime')),
+      FOREIGN KEY (role_id) REFERENCES t_role(id)
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_game_event_role ON t_game_event(role_id, create_time)`,
+
+    `CREATE TABLE IF NOT EXISTS t_reward_choice (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      role_id INTEGER NOT NULL,
+      map_id INTEGER NOT NULL,
+      layer INTEGER NOT NULL,
+      options TEXT NOT NULL,
+      status INTEGER NOT NULL DEFAULT 0,
+      create_time DATETIME DEFAULT (datetime('now','localtime')),
+      FOREIGN KEY (role_id) REFERENCES t_role(id)
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_reward_choice_role ON t_reward_choice(role_id, status)`,
+
     `CREATE TABLE IF NOT EXISTS t_bag (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       role_id INTEGER NOT NULL,
@@ -328,6 +358,8 @@ function migrateColumns(database) {
     ],
     t_role: [
       'last_tick_time DATETIME',
+      'focus_cultivate_count INTEGER NOT NULL DEFAULT 0',
+      'focus_cultivate_date DATE',
     ],
     t_equipment: [
       'star_level INTEGER NOT NULL DEFAULT 0', 'enchant_level INTEGER NOT NULL DEFAULT 0', 'enchant_attrs TEXT',

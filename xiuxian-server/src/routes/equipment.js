@@ -22,7 +22,7 @@ router.post('/api/equipment/equip', async (req, res) => {
   // 卸下该槽位旧装备
   const old = getRow('SELECT * FROM t_equipment WHERE role_id = ? AND slot_type = ?', [equip.role_id, slot_type]);
   if (old) {
-    db.run('UPDATE t_equipment SET slot_type = 0 WHERE id = ?', [old.id]);
+    db.run('UPDATE t_equipment SET slot_type = 0 WHERE role_id = ? AND slot_type = ?', [equip.role_id, slot_type]);
   }
 
   // 穿戴上
@@ -98,20 +98,10 @@ router.post('/api/equipment/enhance', async (req, res) => {
     saveDb();
     return res.json({ code: 0, msg: 'success', data: { success: true, new_level: equip.level + 1, cost } });
   } else {
-    // 失败惩罚：按策划文档分级
-    let penalty;
-    if (lvl <= 3) penalty = 0;               // +1~+3 不会失败
-    else if (lvl <= 8) penalty = 1;           // +4~+8 降1级
-    else if (lvl <= 12) penalty = 2;          // +9~+12 降2级
-    else if (lvl <= 15) penalty = 3;          // +13~+15 降3级
-    else if (lvl <= 18) penalty = -1;         // +16~+18 装备破碎（设为0级）
-    else penalty = -1;                         // +19~+20 装备破碎
-    // -1 表示破碎（重置为0级）
-    const newLevel = penalty === -1 ? 0 : Math.max(0, equip.level - penalty);
-    db.run('UPDATE t_equipment SET level = ? WHERE id = ?', [newLevel, equipment_id]);
-    updateCombatPower(db, equip.role_id);
+    // 失败只消耗铜板，不降级、不破碎，避免随机惩罚破坏装备构筑。
+    const newLevel = equip.level;
     saveDb();
-    return res.json({ code: 0, msg: 'success', data: { success: false, new_level: newLevel, cost, penalty: penalty === -1 ? '破碎' : penalty } });
+    return res.json({ code: 0, msg: 'success', data: { success: false, new_level: newLevel, cost, penalty: 0 } });
   }
 });
 
@@ -120,13 +110,15 @@ function updateCombatPower(db, roleId) {
   const role = getRow('SELECT * FROM t_role WHERE id = ?', [roleId]);
   if (!attrs || !role) return;
   const equipped = getAllRows(
-    'SELECT base_attrs, level FROM t_equipment WHERE role_id = ? AND slot_type > 0', [roleId]
+    'SELECT base_attrs, extra_attrs, level FROM t_equipment WHERE role_id = ? AND slot_type > 0', [roleId]
   );
   let equipBonus = 0;
   for (const e of equipped) {
     try {
       const ba = JSON.parse(e.base_attrs || '{}');
-      equipBonus += (ba.strength || 0) + (ba.vitality || 0) + e.level * 5;
+      const ea = JSON.parse(e.extra_attrs || '[]');
+      equipBonus += (ba.strength || 0) + (ba.vitality || 0) + (ba.agility || 0) + e.level * 5;
+      equipBonus += ea.reduce((sum, affix) => sum + Math.round(Number(affix.value || 0) * 500), 0);
     } catch (_) {}
   }
   const base = (attrs.strength + attrs.vitality + attrs.agility + attrs.intelligence + attrs.accuracy + attrs.sense + attrs.wisdom + attrs.luck) * 4;

@@ -210,6 +210,27 @@
     .storage-tab.active,.tool-chip.active { color: #75e0c6; border-color: rgba(117,224,198,.65); background: rgba(31,75,78,.42); }
     .storage-panel { display: none; }
     .storage-panel.active { display: block; animation: tabReveal .22s ease-out both; }
+    .goal-card { margin-bottom: 12px; padding: 12px; border: 1px solid rgba(117,224,198,.48); border-radius: 12px; background: linear-gradient(135deg,rgba(16,52,58,.88),rgba(18,24,52,.9)); }
+    .goal-kicker { color: #75e0c6; font-size: 9px; letter-spacing: .12em; }
+    .goal-title { margin: 3px 0 5px; color: #f0d88e; font-size: 15px; font-weight: 700; }
+    .goal-meta { color: #a8b6c8; font-size: 10px; margin-bottom: 9px; }
+    .passive-state { display: flex; align-items: center; justify-content: center; min-height: 36px; padding: 7px 10px; border: 1px solid rgba(117,224,198,.32); border-radius: 8px; color: #75e0c6; background: rgba(20,58,62,.38); font-size: 10px; }
+    .build-panel,.encounter-card,.failure-panel { margin-bottom: 11px; padding: 10px; border: 1px solid rgba(112,117,167,.36); border-radius: 10px; background: rgba(9,17,36,.84); }
+    .strategy-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin: 7px 0 9px; }
+    .strategy-btn,.skill-btn { padding: 7px 5px; border: 1px solid rgba(104,126,159,.4); border-radius: 8px; background: rgba(18,22,48,.85); color: #aeb8ca; font-size: 10px; cursor: pointer; }
+    .strategy-btn.active,.skill-btn.active { color: #f0d88e; border-color: rgba(230,197,111,.72); background: rgba(95,70,26,.35); box-shadow: 0 0 12px rgba(230,197,111,.1); }
+    .skill-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; }
+    .skill-btn small { display: block; margin-top: 2px; color: #7f8ba0; font-size: 8px; }
+    .encounter-card strong { color: #f0d88e; }
+    .mechanic-tag { display: inline-block; margin: 5px 4px 0 0; padding: 3px 6px; border-radius: 999px; background: rgba(185,79,102,.18); color: #efa0b3; font-size: 9px; }
+    .failure-panel { display: none; border-color: rgba(212,74,74,.52); }
+    .failure-panel.show { display: block; animation: tabReveal .22s ease-out both; }
+    .failure-panel li { margin: 5px 0 5px 16px; color: #c6cfdd; font-size: 10px; }
+    .equip-action-panel { display: none; margin-top: 8px; padding: 9px; border: 1px solid rgba(230,197,111,.35); border-radius: 9px; background: rgba(20,19,45,.88); }
+    .equip-action-panel.show { display: block; }
+    .reward-choice-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 8px; }
+    .reward-choice { padding: 8px 5px; border: 1px solid rgba(230,197,111,.38); border-radius: 8px; background: rgba(48,37,20,.38); color: #e8dcae; font-size: 9px; cursor: pointer; }
+    .reward-choice small { display: block; margin-top: 4px; color: #9aa6b9; font-size: 8px; }
     .filter-row { display: flex; gap: 5px; margin-bottom: 9px; }
     .filter-btn { padding: 5px 9px; border: 1px solid rgba(102,122,153,.3); border-radius: 99px; background: transparent; color: #8794aa; font-size: 9px; }
     .filter-btn.active { color: #e7ca74; border-color: rgba(231,202,116,.55); background: rgba(118,91,31,.2); }
@@ -272,6 +293,13 @@
       <!-- TAB 1: 角色 -->
       <div class="tab-content active" id="tabRole">
 
+        <div class="goal-card">
+          <div class="goal-kicker">当前主线</div>
+          <div class="goal-title" id="mainGoalTitle">寻找下一处历练</div>
+          <div class="goal-meta" id="mainGoalMeta">推图将提高挂机修炼效率</div>
+          <button class="btn btn-primary btn-block" id="btnGoBattle">前往历练</button>
+        </div>
+
         <div class="role-vitals" aria-label="角色状态">
           <div class="vital-card"><div class="vital-head"><span>气血</span><span id="hpText">0 / 0</span></div><div class="vital-bar vital-hp"><span id="hpFill" style="width:0%"></span></div></div>
           <div class="vital-card"><div class="vital-head"><span>灵力</span><span id="mpText">0 / 0</span></div><div class="vital-bar vital-mp"><span id="mpFill" style="width:0%"></span></div></div>
@@ -298,11 +326,13 @@
         </div>
         <div class="formula-row" id="formulaRow"><span class="formula-chip">基础吐纳 ×1.0</span><span class="formula-chip">灵根加成 —</span><span class="formula-chip">悟性加成 —</span></div>
         <div class="btn-row">
-          <button class="btn btn-primary" id="btnCultivate">×10 (+<span id="cultivateGain">10</span>)</button>
-          <button class="btn" id="btnAutoCultivate" style="background:var(--color-gold);color:#1a1a2e;">×10加速 <span id="autoStatus">▶</span></button>
+          <button class="btn btn-primary" id="btnCultivate">闭关60秒 (+<span id="cultivateGain">60</span>)</button>
+          <div class="passive-state"><i class="ri-timer-flash-line"></i>&nbsp;挂机持续积累</div>
         </div>
+        <div class="text-xs text-center text-dim" id="focusHint">每日可闭关3次</div>
         <div class="text-xs text-center text-dim" style="margin-bottom:var(--sp-sm)" id="breakHint">—</div>
         <div class="btn-row">
+          <button class="btn btn-ghost" id="btnOfflineClaim">领取挂机收益</button>
           <button class="btn btn-ghost" id="btnBreakthrough" disabled>境界突破</button>
         </div>
         </div>
@@ -358,6 +388,12 @@
           <button class="tool-chip" id="btnBattleLog"><i class="ri-file-list-3-line"></i> 战报</button>
           <button class="tool-chip" id="btnBattleReset"><i class="ri-refresh-line"></i> 重置</button>
         </div>
+        <div class="build-panel">
+          <div class="text-sm text-gold"><i class="ri-magic-line"></i> 战前构筑 <span class="text-xs text-dim">选择策略与3门功法</span></div>
+          <div class="strategy-row" id="strategyRow"></div>
+          <div class="skill-grid" id="skillGrid"></div>
+        </div>
+        <div class="encounter-card" id="encounterCard"><span class="text-dim text-xs">选择地图查看下一场敌情</span></div>
         <div class="section-title" id="battleTitle" style="display:none">战斗</div>
         <div class="battle-arena" id="battleArena" style="display:none">
           <div class="battle-unit battle-player" id="battlePlayerUnit">
@@ -374,6 +410,8 @@
         </div>
         <div class="battle-status" id="battleStatus" style="display:none"><span class="battle-round" id="battleRound">准备迎战</span><span id="battleResult">请选择当前层进行挑战</span></div>
         <div class="battle-log" id="battleLog" style="display:none"></div>
+        <div class="build-panel" id="rewardChoicePanel" style="display:none"><div class="text-sm text-gold">关键层奖励 · 三选一</div><div class="text-xs text-dim">选择最适合当前功法路线的装备</div><div class="reward-choice-grid" id="rewardChoiceGrid"></div></div>
+        <div class="failure-panel" id="failurePanel"><div class="text-sm text-gold">战败复盘</div><ul id="failureList"></ul><div class="btn-row"><button class="btn btn-ghost btn-sm" id="btnFailureBuild">调整构筑</button><button class="btn btn-ghost btn-sm" id="btnFailureEquip">整理装备</button></div></div>
         <div class="btn-row" id="battleBtns" style="display:none">
           <button class="btn btn-primary" id="btnChallenge">挑战当前层</button>
         </div>
@@ -393,10 +431,8 @@
         <div class="storage-panel active" id="storageEquip">
         <div class="section-title"><i class="ri-shield-star-line"></i>已穿戴</div>
         <div class="equip-grid" id="equipGrid"></div>
-        <div class="btn-row">
-          <button class="btn btn-ghost" id="btnOfflineClaim">领取离线收益</button>
-        </div>
-        <div class="text-xs text-center text-dim">点击已穿戴装备可强化，长按可卸下</div>
+        <div class="equip-action-panel" id="equipActionPanel"><div class="text-sm text-gold" id="equipActionName">选择一件装备</div><div class="text-xs text-dim" id="equipActionMeta"></div><div class="btn-row"><button class="btn btn-primary btn-sm" id="btnEquipEnhance">强化</button><button class="btn btn-ghost btn-sm" id="btnEquipUnequip">卸下</button></div></div>
+        <div class="text-xs text-center text-dim">点击已穿戴装备查看并操作</div>
         </div>
         <div class="storage-panel" id="storageBag">
         <div class="section-title"><i class="ri-archive-stack-line"></i>储物袋</div>
@@ -443,7 +479,7 @@
         <button class="tab-btn active" data-tab="tabRole"><i class="ri-user-star-line"></i><span>角色</span></button>
         <button class="tab-btn" data-tab="tabEquip"><i class="ri-archive-stack-line"></i><span>储物袋</span></button>
         <button class="tab-btn" data-tab="tabBattle"><i class="ri-sword-line"></i><span>战斗</span></button>
-        <button class="tab-btn" data-tab="tabSect"><i class="ri-ancient-gate-line"></i><span>宗门</span></button>
+        <button class="tab-btn" data-tab="tabSect" style="display:none" aria-hidden="true"><i class="ri-ancient-gate-line"></i><span>宗门</span></button>
       </div>
     </div>
   </div>
@@ -479,7 +515,7 @@
         var btn = document.querySelector('[data-tab="' + tabId + '"]');
         if (btn) btn.classList.add('active');
         currentTab = tabId;
-        if (tabId === 'tabBattle') loadMaps();
+        if (tabId === 'tabBattle') { loadBuild(); loadMaps(); }
         if (tabId === 'tabEquip') { refreshEquip(); refreshLife(); }
         if (tabId === 'tabSect') renderSectLocks();
         if (tabId === 'tabRole') refreshRole();
@@ -498,8 +534,8 @@
       // ====== 数据缓存 ======
       var cachedInfo = null;
       var tickTimer = null;        // 每秒基础修为自动累加
-      var autoTimer = null;        // 10倍加速自动修炼
-      var autoRunning = false;
+      var battleBuild = { strategy: 'attack', skills: ['metal_edge','wood_recovery','stone_skin'] };
+      var buildCatalog = null;
 
       function refreshInfo() {
         return API.getRoleInfo(roleId).then(function(r) {
@@ -524,6 +560,13 @@
         Q('goldVal').textContent = d.resources.gold;
         Q('copperVal').textContent = d.resources.copper;
         Q('enhanceStone').textContent = d.resources.enhance_stone || 0;
+        var progression = d.progression || {};
+        var goal = progression.current_goal || {};
+        Q('mainGoalTitle').textContent = goal.label || '继续历练';
+        Q('mainGoalMeta').textContent = '当前挂机效率 ×' + Number(progression.cultivation_multiplier || 1).toFixed(2)
+          + ' · 下一里程碑第' + ((progression.next_milestone || {}).layer || 5) + '层再提升'
+          + ((progression.next_milestone || {}).bonus_percent || 8) + '%';
+        Q('btnGoBattle').textContent = goal.type === 'breakthrough' ? '先完成突破' : '前往历练';
         ['goldVal', 'copperVal', 'enhanceStone'].forEach(function(id) {
           var item = Q(id).parentElement;
           item.classList.remove('resource-update');
@@ -561,16 +604,19 @@
         Q('realmNextHint').textContent = '下一境界: ' + nextRealmName;
 
         // 修炼速度 = cultivation_speed（已乘基础1.0，即每秒修为值）
-        var cultivateSpeed = d.attributes.cultivation_speed || 1;
+        var cultivateSpeed = d.cultivation ? Number(d.cultivation.effective_speed || 1) : Number(d.attributes.cultivation_speed || 1);
+        var baseCultivateSpeed = d.cultivation ? Number(d.cultivation.base_speed || 1) : Number(d.attributes.cultivation_speed || 1);
         var perSec = Math.round(cultivateSpeed * 10) / 10;    // 基础：每秒修为
-        var perClick = Math.floor(cultivateSpeed * 10);        // 手动：×10
+        var perClick = Math.floor(cultivateSpeed * 60);        // 短时闭关：60秒
 
         Q('speedVal').textContent = perSec.toFixed(1);
         Q('speedDetail').textContent = '';
         Q('cultivateGain').textContent = perClick;
         var rootMult = d.element_root ? Number(d.element_root.cultivate_multiplier || 1) : 1;
-        var wisdomMult = 1 + Math.max(0, Number(d.attributes.wisdom || 0) - 5) * .01;
-        Q('formulaRow').innerHTML = '<span class="formula-chip">基础吐纳 ×1.0</span><span class="formula-chip">灵根 ×' + rootMult.toFixed(2) + '</span><span class="formula-chip">悟性 ×' + wisdomMult.toFixed(2) + '</span><span class="formula-chip">合计 ' + perSec.toFixed(1) + '/秒</span>';
+        Q('formulaRow').innerHTML = '<span class="formula-chip">资质速度 ' + baseCultivateSpeed.toFixed(1) + '/秒</span><span class="formula-chip">灵根已计入 ×' + rootMult.toFixed(2) + '</span><span class="formula-chip">推图 ×' + Number(progression.cultivation_multiplier || 1).toFixed(2) + '</span><span class="formula-chip">合计 ' + perSec.toFixed(1) + '/秒</span>';
+        var focusRemaining = d.cultivation ? d.cultivation.focus_remaining : 3;
+        Q('focusHint').textContent = '今日短时闭关剩余 ' + focusRemaining + '/3 次；继续推图可永久提高每秒修为';
+        Q('btnCultivate').disabled = focusRemaining <= 0;
 
         // 基础属性
         var attrs = [['力量','strength'],['体魄','vitality'],['敏捷','agility'],['灵力','intelligence'],
@@ -645,9 +691,12 @@
         }).join('');
 
         // 突破按钮
-        var canBreak = exp >= expNext;
+        var materialReady = realmIdx < 4 || Number(d.resources.realm_material_1 || 0) >= 5;
+        var canBreak = exp >= expNext && materialReady;
         Q('btnBreakthrough').disabled = !canBreak;
-        Q('breakHint').textContent = canBreak ? '修为已满，可以突破！' : '还需 ' + (expNext - exp).toLocaleString() + ' 修为';
+        Q('breakHint').textContent = canBreak ? '修为与材料齐备，可以突破！' : exp < expNext
+          ? '还需 ' + (expNext - exp).toLocaleString() + ' 修为'
+          : '还需突破材料 ' + Math.max(0, 5 - Number(d.resources.realm_material_1 || 0)) + ' 个（Boss首通掉落）';
       }
 
       // ====== 灵根雷达 ======
@@ -813,16 +862,18 @@
         Q('realmPct').textContent = pct + '%';
         var expVal = Q('expVal');
         if (expVal) expVal.textContent = exp + '/' + expNext;
-        var canBreak = exp >= expNext;
+        var materialReady = !cachedInfo || cachedInfo.basic.realm_level < 4 || Number(cachedInfo.resources.realm_material_1 || 0) >= 5;
+        var canBreak = exp >= expNext && materialReady;
         Q('btnBreakthrough').disabled = !canBreak;
-        Q('breakHint').textContent = canBreak ? '修为已满，可以突破！' : '还需 ' + (expNext - exp).toLocaleString() + ' 修为';
+        Q('breakHint').textContent = canBreak ? '修为与材料齐备，可以突破！' : exp < expNext
+          ? '还需 ' + (expNext - exp).toLocaleString() + ' 修为'
+          : '修为已满，突破材料请从Boss首通获取';
       }
 
       // 基础计时：每秒 +1 倍基础速度
       function startTick() {
         if (tickTimer) clearInterval(tickTimer);
         tickTimer = setInterval(function() {
-          if (autoRunning) return; // ×10加速开启时不重复
           API.tick(roleId).then(function(r) {
             if (!r || r.code !== 0) return;
             if (cachedInfo) cachedInfo.basic.cultivate_exp = r.data.cultivate_exp;
@@ -831,47 +882,26 @@
         }, 1000);
       }
 
-      // ×10加速：切换开关
-      Q('btnAutoCultivate').addEventListener('click', function() {
-        if (autoRunning) { stopAuto(); } else { startAuto(); }
-      });
-
-      function startAuto() {
-        autoRunning = true;
-        Q('autoStatus').textContent = '■';
-        Q('btnAutoCultivate').style.background = '#d44a4a';
-        Q('btnAutoCultivate').style.color = '#fff';
-        function tick() {
-          if (!autoRunning) return;
-          API.autoCultivate(roleId).then(function(r) {
-            if (!r || r.code !== 0) return;
-            if (cachedInfo) cachedInfo.basic.cultivate_exp = r.data.cultivate_exp;
-            updateProgressUI(r.data.cultivate_exp, r.data.cultivate_exp_to_next);
-          });
-        }
-        tick();
-        autoTimer = setInterval(tick, 1000);
-      }
-
-      function stopAuto() {
-        autoRunning = false;
-        if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-        Q('autoStatus').textContent = '▶';
-        Q('btnAutoCultivate').style.background = 'var(--color-gold)';
-        Q('btnAutoCultivate').style.color = '#1a1a2e';
-      }
-
       // ====== 修炼 / 突破 ======
       Q('btnCultivate').addEventListener('click', async function() {
         Q('btnCultivate').disabled = true;
-        await API.cultivate(roleId);
-        Q('btnCultivate').disabled = false;
+        var r = await API.cultivate(roleId);
+        if (r.code !== 0) UI.toast(r.msg);
+        else UI.toast('闭关完成，获得 ' + r.data.gain.toLocaleString() + ' 修为');
         refreshRole();
+      });
+      Q('btnGoBattle').addEventListener('click', function() {
+        if (cachedInfo && cachedInfo.progression && cachedInfo.progression.current_goal.type === 'breakthrough') {
+          Q('btnCultivate').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          UI.toast('先积累修为并突破至练气初期');
+          return;
+        }
+        switchTab('tabBattle');
       });
       Q('btnBreakthrough').addEventListener('click', async function() {
         var r = await API.breakthrough(roleId);
         if (r.code !== 0) { UI.toast(r.msg); return; }
-        UI.toast(r.data.success ? '突破成功！' + r.data.new_realm_name + '！' : '突破失败，修为损失20%');
+        UI.toast(r.data.success ? '突破成功！' + r.data.new_realm_name + '！' : '突破失败，修为保留，可调整后再试');
         refreshRole();
       });
 
@@ -898,15 +928,80 @@
 
       // ====== 战斗 ======
       var selectedMap = 1, selectedLayer = 1, battleSpeed = 1, battleReplay = null;
+      function loadBuild() {
+        return API.battleBuild(roleId).then(function(r) {
+          if (r.code !== 0) return;
+          battleBuild = r.data.build;
+          buildCatalog = r.data.catalog;
+          renderBuild();
+        });
+      }
+      function renderBuild() {
+        if (!buildCatalog) return;
+        Q('strategyRow').innerHTML = buildCatalog.strategies.map(function(item) {
+          return '<button class="strategy-btn' + (battleBuild.strategy === item.id ? ' active' : '') + '" data-strategy="' + item.id + '" title="' + item.description + '">' + item.name + '<small>' + item.description + '</small></button>';
+        }).join('');
+        Q('skillGrid').innerHTML = buildCatalog.skills.map(function(item) {
+          var active = battleBuild.skills.indexOf(item.id) >= 0;
+          return '<button class="skill-btn' + (active ? ' active' : '') + '" data-skill="' + item.id + '">' + item.name + '<small>' + item.route + ' · ' + item.description + '</small></button>';
+        }).join('');
+        document.querySelectorAll('[data-strategy]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            battleBuild.strategy = btn.dataset.strategy;
+            saveBuild();
+          });
+        });
+        document.querySelectorAll('[data-skill]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var id = btn.dataset.skill;
+            if (battleBuild.skills.indexOf(id) >= 0) { UI.toast('必须保留3门功法'); return; }
+            battleBuild.skills = battleBuild.skills.slice(1).concat(id);
+            saveBuild();
+          });
+        });
+      }
+      function saveBuild() {
+        API.saveBattleBuild(roleId, battleBuild.strategy, battleBuild.skills).then(function(r) {
+          if (r.code !== 0) { UI.toast(r.msg); return; }
+          battleBuild = r.data.build;
+          renderBuild();
+          UI.toast('战前构筑已调整');
+        });
+      }
+      function renderEncounter(encounter, battleInfo) {
+        if (!encounter) { Q('encounterCard').innerHTML = '<span class="text-dim text-xs">暂无敌情</span>'; return; }
+        var mechanics = (encounter.mechanics || []).map(function(item) { return '<span class="mechanic-tag" title="' + item.description + '">' + item.name + ' · ' + item.description + '</span>'; }).join('');
+        var waveText = battleInfo ? battleInfo.wave_count + '波 · 共' + battleInfo.enemy_count + '只敌人 · 每波' + battleInfo.wave_enemy_counts.join('/') + '只' : '多波战斗';
+        Q('encounterCard').innerHTML = '<div class="text-xs text-dim">下一场敌情 · ' + waveText + '</div><strong>' + encounter.title + '</strong><div>' + (mechanics || '<span class="text-xs text-dim">普通遭遇，无特殊机制</span>') + '</div>';
+      }
+      function showRewardChoice(choice) {
+        if (!choice || !choice.options || !choice.options.length) { Q('rewardChoicePanel').style.display = 'none'; return; }
+        var routeNames = { burst:'爆发', survival:'生存', swift:'疾行' };
+        Q('rewardChoiceGrid').innerHTML = choice.options.map(function(item) {
+          var attrs = item.base_attrs || {};
+          return '<button class="reward-choice" data-choice-index="' + item.index + '"><strong>' + (routeNames[item.archetype] || '均衡') + '流</strong><small>' + item.name + '<br>力量 +' + (attrs.strength || 0) + ' · 体魄 +' + (attrs.vitality || 0) + (attrs.agility ? '<br>敏捷 +' + attrs.agility : '') + '</small></button>';
+        }).join('');
+        Q('rewardChoicePanel').style.display = 'block';
+        document.querySelectorAll('[data-choice-index]').forEach(function(btn) {
+          btn.addEventListener('click', async function() {
+            document.querySelectorAll('[data-choice-index]').forEach(function(item) { item.disabled = true; });
+            var r = await API.claimRewardChoice(choice.choice_id, parseInt(btn.dataset.choiceIndex, 10));
+            if (r.code !== 0) { UI.toast(r.msg); return; }
+            Q('rewardChoicePanel').style.display = 'none';
+            UI.toast('已选择 ' + r.data.equipment.name + '，可前往储物袋穿戴');
+            refreshRole();
+          });
+        });
+      }
       function setBattleHp(id, current, max) {
         var pct = Math.max(0, Math.min(100, Math.round((current / Math.max(max, 1)) * 100)));
         Q(id).style.width = pct + '%';
       }
-      function prepareBattleArena(mapName) {
+      function prepareBattleArena(mapName, enemyName) {
         var maxHp = cachedInfo && cachedInfo.attributes ? cachedInfo.attributes.hp : 100;
         Q('battleArena').style.display = 'block';
         Q('battlePlayerName').textContent = cachedInfo && cachedInfo.basic ? cachedInfo.basic.name : '道友';
-        Q('battleMonsterName').textContent = mapName + '守境灵兽';
+        Q('battleMonsterName').textContent = enemyName || (mapName + '守境灵兽');
         setBattleHp('battlePlayerHp', maxHp, maxHp);
         setBattleHp('battleMonsterHp', 100, 100);
         Q('battlePlayerUnit').classList.remove('hit', 'defeated');
@@ -925,36 +1020,50 @@
       function playBattleVisual(data) {
         var logs = data.log || [];
         var playerMax = cachedInfo && cachedInfo.attributes ? cachedInfo.attributes.hp : 100;
-        Q('battleMonsterName').textContent = data.monster.name;
+        var firstCombatLog = logs.find(function(item) { return item.monsterName; });
+        Q('battleMonsterName').textContent = firstCombatLog ? firstCombatLog.monsterName : data.monster.name;
         setBattleHp('battlePlayerHp', playerMax, playerMax);
-        setBattleHp('battleMonsterHp', data.monster.hp, data.monster.hp);
+        setBattleHp('battleMonsterHp', firstCombatLog ? firstCombatLog.monsterMaxHp : data.monster.hp, firstCombatLog ? firstCombatLog.monsterMaxHp : data.monster.hp);
         Q('battlePlayerUnit').classList.remove('hit', 'defeated');
         Q('battleMonsterUnit').classList.remove('hit', 'defeated');
         Q('battleStatus').style.display = 'flex';
         if (battleReplay) clearInterval(battleReplay);
         var sample = logs.length > 14 ? logs.slice(0, 12).concat(logs.slice(-2)) : logs.slice();
         var index = 0;
+        var currentEnemyKey = '';
         function finishReplay() {
           if (battleReplay) { clearInterval(battleReplay); battleReplay = null; }
           var lastPlayer = logs.filter(function(l) { return l.playerHp != null; }).pop();
           var lastMonster = logs.filter(function(l) { return l.monsterHp != null; }).pop();
           if (lastPlayer) setBattleHp('battlePlayerHp', lastPlayer.playerHp, playerMax);
-          if (lastMonster) setBattleHp('battleMonsterHp', lastMonster.monsterHp, data.monster.hp);
+          if (lastMonster) setBattleHp('battleMonsterHp', lastMonster.monsterHp, lastMonster.monsterMaxHp || data.monster.hp);
           if (data.result === 'win') Q('battleMonsterUnit').classList.add('defeated');
           if (data.result === 'lose') Q('battlePlayerUnit').classList.add('defeated');
-          Q('battleRound').textContent = '战斗结束 · ' + data.rounds + '回合';
+          Q('battleRound').textContent = '战斗结束 · ' + (data.waves || []).length + '波 · ' + data.defeated_count + '只敌人';
           Q('battleResult').textContent = data.result === 'win' ? '历练胜利' : data.result === 'lose' ? '历练失利' : '战斗超时';
         }
         function playStep() {
           if (index >= sample.length) { finishReplay(); return; }
           var log = sample[index++];
-          Q('battleRound').textContent = '第 ' + log.round + ' 回合';
+          var enemyKey = (log.wave || 1) + '-' + (log.enemy || 1);
+          if (enemyKey !== currentEnemyKey) {
+            currentEnemyKey = enemyKey;
+            setBattleHp('battleMonsterHp', log.monsterMaxHp || data.monster.hp, log.monsterMaxHp || data.monster.hp);
+          }
+          Q('battleRound').textContent = '第' + (log.wave || 1) + '波 · 第' + (log.enemy || 1) + '/' + (log.enemyCount || 1) + '只 · 回合' + log.round;
+          if (log.monsterName) Q('battleMonsterName').textContent = log.monsterName;
+          if (log.heal) {
+            setBattleHp('battlePlayerHp', log.playerHp, playerMax);
+            Q('battleResult').textContent = '青木回春恢复 ' + log.heal + ' 气血';
+            return;
+          }
           if (log.attacker === '玩家') {
             Q('battleMonsterUnit').classList.add('hit');
             setTimeout(function() { Q('battleMonsterUnit').classList.remove('hit'); }, 120 / battleSpeed);
-            setBattleHp('battleMonsterHp', log.monsterHp, data.monster.hp);
+            setBattleHp('battleMonsterHp', log.monsterHp, log.monsterMaxHp || data.monster.hp);
             showBattleDamage(log.damage, log.isCrit);
           } else {
+            if (log.dodged) { Q('battleResult').textContent = '御风闪避成功'; return; }
             Q('battlePlayerUnit').classList.add('hit');
             setTimeout(function() { Q('battlePlayerUnit').classList.remove('hit'); }, 120 / battleSpeed);
             setBattleHp('battlePlayerHp', log.playerHp, playerMax);
@@ -969,7 +1078,9 @@
           if (r.code !== 0) return;
           Q('mapList').innerHTML = '<div class="map-path">' + r.data.maps.map(function(m) {
             var unlocked = cachedInfo && cachedInfo.basic.realm_level >= m.unlockRealm;
-            return '<div class="map-node' + (m.map_id === selectedMap ? ' current' : '') + (!unlocked ? ' locked' : '') + '" data-map="' + m.map_id + '"><div><div class="info">' + m.name + '</div><div class="prog">' + (unlocked ? '历练进度 ' + m.max_layer + '/' + m.layers + ' 层' : '需境界 ' + m.unlockRealm) + '</div></div><button class="btn btn-ghost btn-sm"' + (!unlocked ? ' disabled' : '') + '>入境</button></div>';
+            var nextType = m.next_encounter && m.next_encounter.type !== 'normal' ? ' · 下一层' + (m.next_encounter.type === 'boss' ? 'Boss' : '精英') : '';
+            var waveInfo = m.next_battle ? ' · ' + m.next_battle.wave_count + '波/' + m.next_battle.enemy_count + '敌' : '';
+            return '<div class="map-node' + (m.map_id === selectedMap ? ' current' : '') + (!unlocked ? ' locked' : '') + '" data-map="' + m.map_id + '"><div><div class="info">' + m.name + '</div><div class="prog">' + (unlocked ? '历练进度 ' + m.max_layer + '/' + m.layers + ' 层' + nextType + waveInfo : '需境界 ' + m.unlockRealm) + '</div></div><button class="btn btn-ghost btn-sm"' + (!unlocked ? ' disabled' : '') + '>入境</button></div>';
           }).join('') + '</div>';
 
           document.querySelectorAll('.map-node').forEach(function(card) {
@@ -983,9 +1094,14 @@
               Q('battleBtns').style.display = 'flex';
               Q('mapHint').style.display = 'none';
               Q('battleLog').style.display = 'none';
-              prepareBattleArena(mapData ? mapData.name : '秘境');
+              Q('failurePanel').classList.remove('show');
+              renderEncounter(mapData ? mapData.next_encounter : null, mapData ? mapData.next_battle : null);
+              prepareBattleArena(mapData ? mapData.name : '秘境', mapData && mapData.next_battle ? '第一波 · ' + mapData.next_battle.wave_enemy_counts[0] + '只敌人' : null);
             });
           });
+        });
+        API.pendingRewardChoice(roleId).then(function(r) {
+          if (r.code === 0) showRewardChoice(r.data.choice);
         });
       }
       Q('btnChallenge').addEventListener('click', async function() {
@@ -996,25 +1112,47 @@
         playBattleVisual(r.data);
         var html = '';
         (r.data.log || []).forEach(function(l) {
+          var prefix = '第' + (l.wave || 1) + '波·第' + (l.enemy || 1) + '只·回合' + l.round + ': ';
+          if (l.heal) {
+            html += '<div>' + prefix + '青木回春恢复 <span class="text-gold">' + l.heal + '</span> 气血</div>';
+          } else if (l.dodged) {
+            html += '<div>' + prefix + '御风步闪避了' + (l.monsterName || '敌人') + '的攻击</div>';
+          } else
           if (l.attacker === '玩家') {
-            html += '<div>第' + l.round + '回合: 你造成 <span class="crit">' + l.damage + '</span> 伤害' + (l.isCrit ? ' <b>暴击!</b>' : '') + ' | 怪物剩余 ' + l.monsterHp + '</div>';
+            html += '<div>' + prefix + '你对' + (l.monsterName || '敌人') + '造成 <span class="crit">' + l.damage + '</span> 伤害' + (l.isCrit ? ' <b>暴击!</b>' : '') + (l.skill ? ' · 功法触发' : '') + ' | 剩余 ' + l.monsterHp + '</div>';
           } else {
-            html += '<div>第' + l.round + '回合: ' + l.attacker + ' 造成 <span>' + l.damage + '</span> 伤害 | 你剩余 ' + l.playerHp + '</div>';
+            html += '<div>' + prefix + l.attacker + ' 造成 <span>' + l.damage + '</span> 伤害 | 你剩余 ' + l.playerHp + '</div>';
           }
         });
         Q('battleLog').innerHTML = html;
         Q('battleLog').style.display = 'block';
         if (r.data.result === 'win') {
-          UI.toast('胜利！获得 ' + r.data.rewards.exp + ' 修为 + ' + r.data.rewards.gold + ' 灵石' + (r.data.rewards.equipment ? ' + 装备！' : ''));
+          Q('failurePanel').classList.remove('show');
+          var extraReward = (r.data.rewards.equipment ? ' + 装备' : '') + (r.data.rewards.breakthrough_material ? ' + 突破材料×' + r.data.rewards.breakthrough_material : '');
+          UI.toast('胜利！获得 ' + r.data.rewards.exp + ' 修为 + ' + r.data.rewards.gold + ' 灵石' + extraReward);
+          if (r.data.rewards.cultivation_upgrade) setTimeout(function() { UI.toast('挂机修炼效率提升至 ×' + r.data.rewards.cultivation_upgrade.multiplier); }, 800);
+          if (r.data.rewards.reward_choice) showRewardChoice(r.data.rewards.reward_choice);
           selectedLayer++;
           Q('battleTitle').textContent += ' → 第' + selectedLayer + '层';
         } else if (r.data.result === 'lose') {
-          UI.toast('战败... ' + r.data.rewards.exp + ' 修为');
+          var fallback = Math.max(0, Number(r.data.fallback_layer || 0));
+          UI.toast('第' + r.data.failed_wave + '波战败，退回第' + fallback + '层');
+          selectedLayer = Math.max(1, fallback);
+          Q('battleTitle').textContent = fallback > 0 ? '战败退回 · 第' + fallback + '层' : '战败退回 · 从第1层重新开始';
+          Q('failureList').innerHTML = (r.data.recommendations || []).map(function(item) { return '<li>' + item + '</li>'; }).join('');
+          Q('failurePanel').classList.add('show');
         } else {
-          UI.toast('战斗超时，获得 ' + r.data.rewards.exp + ' 修为');
+          var timeoutFallback = Math.max(0, Number(r.data.fallback_layer || 0));
+          UI.toast('第' + r.data.failed_wave + '波战斗超时，退回第' + timeoutFallback + '层');
+          selectedLayer = Math.max(1, timeoutFallback);
+          Q('battleTitle').textContent = timeoutFallback > 0 ? '超时退回 · 第' + timeoutFallback + '层' : '超时退回 · 从第1层重新开始';
+          Q('failureList').innerHTML = (r.data.recommendations || []).map(function(item) { return '<li>' + item + '</li>'; }).join('');
+          Q('failurePanel').classList.add('show');
         }
-        refreshRole();
+        refreshRole(); loadMaps();
       });
+      Q('btnFailureBuild').addEventListener('click', function() { Q('strategyRow').scrollIntoView({ behavior:'smooth', block:'center' }); });
+      Q('btnFailureEquip').addEventListener('click', function() { switchTab('tabEquip'); });
 
       document.querySelectorAll('[data-speed]').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -1040,6 +1178,7 @@
 
       // ====== 装备 ======
       var currentBagFilter = 'all';
+      var selectedEquippedItem = null;
       function refreshEquip() {
         refreshInfo().then(function() {
           var d = cachedInfo;
@@ -1054,6 +1193,8 @@
           }).join('');
           renderBag(d);
           bindEquippedSlots();
+          Q('equipActionPanel').classList.remove('show');
+          selectedEquippedItem = null;
         });
       }
 
@@ -1070,7 +1211,14 @@
           Q('bagList').innerHTML = bagItems.map(function(e) {
             var attrs = {};
             try { attrs = typeof e.base_attrs === 'string' ? JSON.parse(e.base_attrs || '{}') : (e.base_attrs || {}); } catch(ignore) {}
-            return '<div class="bag-card"><div class="item-rune"><i class="ri-sword-line"></i></div><div><div class="' + QUALITY_CLASS[e.quality] + '">' + e.template_name + ' +' + e.level + '</div><div class="bag-meta">' + QUALITY[e.quality] + ' · 力量 +' + (attrs.strength || 0) + ' · 体魄 +' + (attrs.vitality || 0) + '</div></div><button class="btn btn-ghost btn-sm equip-btn" data-eid="' + e.id + '">穿戴</button></div>';
+            var route = equipRoute(e);
+            var slot = inferEquipSlot(e);
+            var current = equippedForSlot(slot);
+            var currentAttrs = parseBaseAttrs(current);
+            var deltaStr = Number(attrs.strength || 0) - Number(currentAttrs.strength || 0);
+            var deltaVit = Number(attrs.vitality || 0) - Number(currentAttrs.vitality || 0);
+            var compare = current ? ' · 较当前 力量' + signed(deltaStr) + ' 体魄' + signed(deltaVit) : ' · 当前槽位为空';
+            return '<div class="bag-card"><div class="item-rune"><i class="ri-sword-line"></i></div><div><div class="' + QUALITY_CLASS[e.quality] + '">' + e.template_name + ' +' + e.level + '</div><div class="bag-meta">' + route + '流 · 力量 +' + (attrs.strength || 0) + ' · 体魄 +' + (attrs.vitality || 0) + compare + '</div></div><button class="btn btn-ghost btn-sm equip-btn" data-eid="' + e.id + '">穿戴</button></div>';
           }).join('');
           document.querySelectorAll('.equip-btn').forEach(function(btn) {
             btn.addEventListener('click', async function() {
@@ -1093,36 +1241,53 @@
         for (var i = 1; i < SLOT_NAMES.length; i++) if (name.indexOf(SLOT_NAMES[i]) >= 0) return i;
         return 1;
       }
+      function parseBaseAttrs(e) {
+        if (!e) return {};
+        try { return typeof e.base_attrs === 'string' ? JSON.parse(e.base_attrs || '{}') : (e.base_attrs || {}); } catch (_) { return {}; }
+      }
+      function equipRoute(e) {
+        if (!e) return '均衡';
+        var extra = [];
+        try { extra = typeof e.extra_attrs === 'string' ? JSON.parse(e.extra_attrs || '[]') : (e.extra_attrs || []); } catch (_) {}
+        if (extra.some(function(item) { return item.type === 'crit_rate'; })) return '爆发';
+        if (extra.some(function(item) { return item.type === 'damage_reduce'; })) return '生存';
+        if (extra.some(function(item) { return item.type === 'attack_speed'; })) return '疾行';
+        return '均衡';
+      }
+      function signed(value) { return value >= 0 ? '+' + value : String(value); }
       function bindEquippedSlots() {
         document.querySelectorAll('.equip-slot.equipped').forEach(function(slotEl) {
-          var longPress = null, didLongPress = false;
-          slotEl.addEventListener('pointerdown', function() {
-            didLongPress = false;
-            longPress = setTimeout(async function() {
-              didLongPress = true;
-              var slot = parseInt(slotEl.dataset.slot);
-              var r = await API.unequipItem(roleId, slot);
-              if (r.code !== 0) { UI.toast(r.msg); return; }
-              UI.toast('装备已收入储物袋');
-              refreshEquip();
-            }, 650);
-          });
-          ['pointerup','pointerleave','pointercancel'].forEach(function(name) { slotEl.addEventListener(name, function() { if (longPress) clearTimeout(longPress); }); });
-          slotEl.addEventListener('click', async function() {
-            if (didLongPress) return;
-            var eq = equippedForSlot(parseInt(slotEl.dataset.slot));
+          slotEl.addEventListener('click', function() {
+            var eq = equippedForSlot(parseInt(slotEl.dataset.slot, 10));
             if (!eq) return;
-            var r3 = await API.enhanceItem(eq.id);
-            if (r3.code !== 0) { UI.toast(r3.msg); return; }
-            UI.toast(r3.data.success ? '强化成功，当前 +' + r3.data.new_level : '强化失败，当前 +' + r3.data.new_level);
-            refreshEquip();
+            selectedEquippedItem = eq;
+            var attrs = parseBaseAttrs(eq);
+            Q('equipActionName').textContent = eq.template_name + ' +' + eq.level;
+            Q('equipActionMeta').textContent = equipRoute(eq) + '流 · 力量 +' + (attrs.strength || 0) + ' · 体魄 +' + (attrs.vitality || 0) + ' · 强化失败不降级';
+            Q('equipActionPanel').classList.add('show');
           });
         });
       }
       function equippedForSlot(slot) {
         if (!cachedInfo || !cachedInfo.equipment) return null;
-        return cachedInfo.equipment.find(function(e) { return e.slot_type === slot; }) || null;
+        var matches = cachedInfo.equipment.filter(function(e) { return e.slot_type === slot; });
+        return matches.length ? matches[matches.length - 1] : null;
       }
+      Q('btnEquipEnhance').addEventListener('click', async function() {
+        if (!selectedEquippedItem) return;
+        var r = await API.enhanceItem(selectedEquippedItem.id);
+        if (r.code !== 0) { UI.toast(r.msg); return; }
+        UI.toast(r.data.success ? '强化成功，当前 +' + r.data.new_level : '强化失败，装备未降级');
+        refreshEquip(); refreshRole();
+      });
+      Q('btnEquipUnequip').addEventListener('click', async function() {
+        if (!selectedEquippedItem) return;
+        var slot = selectedEquippedItem.slot_type;
+        var r = await API.unequipItem(roleId, slot);
+        if (r.code !== 0) { UI.toast(r.msg); return; }
+        UI.toast('装备已收入储物袋');
+        refreshEquip(); refreshRole();
+      });
 
       document.querySelectorAll('.storage-tab').forEach(function(btn) {
         btn.addEventListener('click', function() {

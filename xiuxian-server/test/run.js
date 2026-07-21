@@ -8,7 +8,7 @@ const tempDir = path.join(__dirname, '.tmp');
 const dbPath = path.join(tempDir, 'xiuxian.test.db');
 const port = 3100;
 const baseUrl = `http://127.0.0.1:${port}`;
-const tests = ['phase0.test.js', 'api.test.js', 'phase1.test.js', 'phase2.test.js', 'phase3.test.js', 'phase4-6.test.js', 'phase7.test.js', 'security.test.js'];
+const tests = ['phase0.test.js', 'api.test.js', 'phase1.test.js', 'phase2.test.js', 'phase3.test.js', 'phase4-6.test.js', 'phase7.test.js', 'core-loop.test.js', 'security.test.js'];
 
 function requestHealth() {
   return new Promise((resolve) => {

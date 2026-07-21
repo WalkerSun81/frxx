@@ -3,6 +3,7 @@ const router = express.Router();
 const { getDb, saveDb, getRow, getAllRows, insert } = require('../db/init');
 const config = require('../config');
 const { requireOwnedRole } = require('../ownership');
+const { getProgression } = require('../game/progression');
 
 const G = config.GAME;
 
@@ -106,6 +107,9 @@ router.get('/api/role/info', async (req, res) => {
     [roleId]
   );
   const resources = getRow('SELECT * FROM t_resource WHERE role_id = ?', [roleId]) || {};
+  const progression = getProgression(roleId, role.realm_level);
+  const today = getRow("SELECT date('now','localtime') AS today")?.today;
+  const focusUsed = role.focus_cultivate_date === today ? Number(role.focus_cultivate_count || 0) : 0;
 
   // 境界名称映射
   const realmNames = [
@@ -159,7 +163,16 @@ router.get('/api/role/info', async (req, res) => {
         cultivate_book: resources.cultivate_book || 0,
         enhance_stone: resources.enhance_stone || 0,
         auto_cultivate_count: resources.realm_contribution || 0,
+        realm_material_1: resources.realm_material_1 || 0,
       },
+      cultivation: {
+        base_speed: attrs.cultivation_speed || 1,
+        effective_speed: (attrs.cultivation_speed || 1) * progression.cultivation_multiplier,
+        focus_used: focusUsed,
+        focus_limit: 3,
+        focus_remaining: Math.max(0, 3 - focusUsed),
+      },
+      progression,
     },
   });
 });

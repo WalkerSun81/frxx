@@ -63,6 +63,14 @@ const API = (() => {
   function challenge(roleId, mapId, layer) {
     return request('/api/battle/challenge', { body: { role_id: roleId, map_id: mapId, layer } });
   }
+  function battleBuild(roleId) { return request(`/api/battle/build?role_id=${roleId}`, { method: 'GET' }); }
+  function saveBattleBuild(roleId, strategy, skills) {
+    return request('/api/battle/build', { body: { role_id: roleId, strategy, skills } });
+  }
+  function claimRewardChoice(choiceId, optionIndex) {
+    return request('/api/battle/reward-choice', { body: { choice_id: choiceId, option_index: optionIndex } });
+  }
+  function pendingRewardChoice(roleId) { return request(`/api/battle/reward-choice?role_id=${roleId}`, { method: 'GET' }); }
 
   // ---------- Phase 4: 装备 ----------
   function equipItem(equipId, slotType) {
@@ -92,6 +100,6 @@ const API = (() => {
   return { setToken, getToken, clearToken, health, login,
     createRole, getRoleInfo, randomElement, confirmElement, randomTalent, confirmTalent,
     cultivate, tick, autoCultivate, breakthrough, startAfk, offlineReward,
-    battleMaps, challenge, equipItem, unequipItem, enhanceItem, shopBuy,
+    battleMaps, challenge, battleBuild, saveBattleBuild, claimRewardChoice, pendingRewardChoice, equipItem, unequipItem, enhanceItem, shopBuy,
     gemList, mountGem, unmountGem, composeGem, lifeInfo, collect, craft };
 })();

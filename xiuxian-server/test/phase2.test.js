@@ -53,21 +53,17 @@ async function main() {
   chk(r.data.gain > 0, '修为有增长', r.data.gain);
   chk(r.data.cultivate_speed >= 1, '体现修炼速度', r.data.cultivate_speed);
 
-  // 多次修炼
+  // 短时闭关每日最多3次
   let info = await rq('GET', '/api/role/info?role_id=' + roleId, null, token);
   const beforeExp = info.data.basic.cultivate_exp;
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 2; i++) {
     await rq('POST', '/api/role/cultivate', { role_id: roleId }, token);
   }
   info = await rq('GET', '/api/role/info?role_id=' + roleId, null, token);
   chk(info.data.basic.cultivate_exp > beforeExp, '多次修炼累积增长', info.data.basic.cultivate_exp - beforeExp);
 
-  // 修炼到满（凡人→练气需约100修为，约点10次）
-  while (true) {
-    r = await rq('POST', '/api/role/cultivate', { role_id: roleId }, token);
-    if (r.data.cultivate_exp >= r.data.cultivate_exp_to_next) break;
-    if (r.data.cultivate_exp > 1000) break; // safety
-  }
+  r = await rq('POST', '/api/role/cultivate', { role_id: roleId }, token);
+  chk(r.code === 3001, '第4次短时闭关被限制', r.code);
   info = await rq('GET', '/api/role/info?role_id=' + roleId, null, token);
   chk(info.data.basic.cultivate_exp >= info.data.basic.cultivate_exp_to_next, '修为可以修炼到满', info.data.basic.cultivate_exp);
 

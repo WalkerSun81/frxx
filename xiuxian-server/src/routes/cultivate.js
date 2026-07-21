@@ -3,10 +3,25 @@ const router = express.Router();
 const { getDb, saveDb, getRow } = require('../db/init');
 const config = require('../config');
 const { requireOwnedRole } = require('../ownership');
+const { getProgression } = require('../game/progression');
+const { logGameEvent } = require('../game/analytics');
 
 const MAX_OFFLINE = config.GAME.MAX_OFFLINE_SECONDS;
 const OFFLINE_EFF = config.GAME.OFFLINE_EFFICIENCY;
 const BASE_SPEED = config.GAME.BASE_CULTIVATE_SPEED;
+const DAILY_FOCUS_LIMIT = 3;
+const FOCUS_SECONDS = 60;
+
+function getCultivationRate(roleId, realmLevel) {
+  const attr = getRow('SELECT cultivation_speed FROM t_role_attribute WHERE role_id = ?', [roleId]);
+  const baseSpeed = attr ? Math.max(attr.cultivation_speed, 1.0) * BASE_SPEED : BASE_SPEED;
+  const progression = getProgression(roleId, realmLevel);
+  return {
+    baseSpeed,
+    speed: baseSpeed * progression.cultivation_multiplier,
+    progression,
+  };
+}
 
 const REALM_NAMES = [
   '凡人', '练气初期', '练气中期', '练气后期', '练气圆满',
@@ -102,7 +117,7 @@ function getAttrGrowth(realmLevel) {
 
 /**
  * POST /api/role/cultivate
- * 在线修炼，返回修为增量
+ * 短时闭关：每日少量次数，用于补齐临近突破的修为缺口
  */
 router.post('/api/role/cultivate', async (req, res) => {
   const { role_id } = req.body || {};
@@ -113,18 +128,22 @@ router.post('/api/role/cultivate', async (req, res) => {
   const role = requireOwnedRole(res, role_id, req.playerId);
   if (!role) return;
 
-  // 修炼速度
-  const attr = getRow('SELECT cultivation_speed FROM t_role_attribute WHERE role_id = ?', [role_id]);
-  const speed = attr ? Math.max(attr.cultivation_speed, 1.0) * BASE_SPEED : BASE_SPEED;
+  const today = getRow("SELECT date('now','localtime') AS today")?.today;
+  const usedToday = role.focus_cultivate_date === today ? Number(role.focus_cultivate_count || 0) : 0;
+  if (usedToday >= DAILY_FOCUS_LIMIT) {
+    return res.json({ code: 3001, msg: '今日闭关次数已用完，请通过推图提高挂机效率', data: null });
+  }
 
-  // 每请求加 10 秒修为
-  const gain = Math.floor(speed * 10);
+  const { speed, baseSpeed, progression } = getCultivationRate(role_id, role.realm_level);
+  const gain = Math.floor(speed * FOCUS_SECONDS);
   const newExp = role.cultivate_exp + gain;
   role.cultivate_exp = newExp;
 
   const db = await getDb();
-  db.run('UPDATE t_role SET cultivate_exp = ?, total_cultivate_exp = total_cultivate_exp + ?, update_time = datetime(\'now\',\'localtime\') WHERE id = ?',
-    [newExp, gain, role_id]);
+  db.run(`UPDATE t_role SET cultivate_exp = ?, total_cultivate_exp = total_cultivate_exp + ?,
+    focus_cultivate_count = ?, focus_cultivate_date = ?, update_time = datetime('now','localtime') WHERE id = ?`,
+    [newExp, gain, usedToday + 1, today, role_id]);
+  logGameEvent(db, role_id, 'focus_cultivate', { gain, used: usedToday + 1, progression_multiplier: progression.cultivation_multiplier });
   saveDb();
 
   return res.json({
@@ -134,6 +153,10 @@ router.post('/api/role/cultivate', async (req, res) => {
       cultivate_exp_to_next: role.cultivate_exp_to_next,
       gain,
       cultivate_speed: speed,
+      base_speed: baseSpeed,
+      focus_seconds: FOCUS_SECONDS,
+      remaining_focus_count: DAILY_FOCUS_LIMIT - usedToday - 1,
+      progression,
     },
   });
 });
@@ -163,7 +186,7 @@ router.post('/api/role/breakthrough', async (req, res) => {
 
   // 大境界突破需要破境丹（realm_level 末尾需要突破材料）
   // 简化：每4级（大境界切换）检查一次
-  const needPill = (role.realm_level > 0 && (role.realm_level + 1) % 4 === 1);
+  const needPill = false; // 当前核心循环只保留Boss突破材料，破境丹待炼丹闭环完成后再启用。
   // 凡人(0)→练气也可以不需要材料。从练气圆满(4)→筑基(5)开始检查
   const needMaterial = role.realm_level >= 4;
 
@@ -219,6 +242,7 @@ router.post('/api/role/breakthrough', async (req, res) => {
     const cp = calcCombatPower(newAttrs, newRealm);
     db.run('UPDATE t_role SET combat_power = ? WHERE id = ?', [cp, role_id]);
 
+    logGameEvent(db, role_id, 'breakthrough', { success: true, old_realm: role.realm_level, new_realm: newRealm });
     saveDb();
 
     // WebSocket 推送：境界突破成功
@@ -250,19 +274,15 @@ router.post('/api/role/breakthrough', async (req, res) => {
       },
     });
   } else {
-    // 失败：扣除材料（不返还破境丹，返还50%突破材料）、保留80%修为
+    // 失败保留全部修为，只消耗1个材料，避免随机结果抹掉长时间积累。
     if (needMaterial) {
-      // 扣5个材料，返还2个（取整向下 = 2）
-      const refund = 2;
-      const consumed = 5;
-      db.run('UPDATE t_resource SET realm_material_1 = realm_material_1 - ? WHERE role_id = ?',
-        [consumed - refund, role_id]);
+      db.run('UPDATE t_resource SET realm_material_1 = MAX(0, realm_material_1 - 1) WHERE role_id = ?', [role_id]);
     }
     if (needPill) {
       db.run('UPDATE t_resource SET realm_material_2 = realm_material_2 - 1 WHERE role_id = ?', [role_id]);
     }
-    const penaltyExp = Math.floor(role.cultivate_exp * 0.2);
-    db.run('UPDATE t_role SET cultivate_exp = cultivate_exp - ? WHERE id = ?', [penaltyExp, role_id]);
+    const penaltyExp = 0;
+    logGameEvent(db, role_id, 'breakthrough', { success: false, realm: role.realm_level, penalty_exp: penaltyExp });
     saveDb();
 
     return res.json({
@@ -299,8 +319,7 @@ router.post('/api/role/offline_reward', async (req, res) => {
   const role = requireOwnedRole(res, role_id, req.playerId);
   if (!role) return;
 
-  const attr = getRow('SELECT cultivation_speed FROM t_role_attribute WHERE role_id = ?', [role_id]);
-  const speed = attr ? Math.max(attr.cultivation_speed, 1.0) * BASE_SPEED : BASE_SPEED;
+  const { speed, baseSpeed, progression } = getCultivationRate(role_id, role.realm_level);
 
   // 上次活跃记录
   const lastAfk = getRow(
@@ -337,6 +356,15 @@ router.post('/api/role/offline_reward', async (req, res) => {
       [capped, gain, goldGain, lastAfk.id]);
   }
 
+  // 结算后立即开始下一段挂机，避免玩家因遗漏操作停止长期成长。
+  const afkLayer = Math.max(1, progression.current_goal.layer - 1);
+  db.run(
+    `INSERT INTO t_afk_record (role_id, map_id, layer, start_time, status)
+     VALUES (?, ?, ?, datetime('now','localtime'), 0)`,
+    [role_id, progression.current_goal.map_id, afkLayer]
+  );
+  logGameEvent(db, role_id, 'offline_claim', { seconds: capped, gain, progression_multiplier: progression.cultivation_multiplier });
+
   saveDb();
 
   return res.json({
@@ -347,6 +375,8 @@ router.post('/api/role/offline_reward', async (req, res) => {
       gold_gain: goldGain,
       copper_gain: copperGain,
       cultivate_speed: speed,
+      base_speed: baseSpeed,
+      progression,
     },
   });
 });
@@ -366,8 +396,7 @@ router.post('/api/role/tick', async (req, res) => {
   if (!role) return;
   if (isRateLimited(role.last_tick_time)) return res.json({ code: 4001, msg: '修炼请求过快', data: null });
 
-  const attr = getRow('SELECT cultivation_speed FROM t_role_attribute WHERE role_id = ?', [role_id]);
-  const speed = attr ? Math.max(attr.cultivation_speed, 1.0) * BASE_SPEED : BASE_SPEED;
+  const { speed, baseSpeed, progression } = getCultivationRate(role_id, role.realm_level);
 
   // 每 tick = 1 秒量
   const gain = Math.round(speed);
@@ -384,13 +413,15 @@ router.post('/api/role/tick', async (req, res) => {
       cultivate_exp_to_next: role.cultivate_exp_to_next,
       gain,
       cultivate_speed: speed,
+      base_speed: baseSpeed,
+      progression,
     },
   });
 });
 
 /**
  * POST /api/role/auto_cultivate
- * 自动修炼（加速10倍），消耗次数；次数耗尽后需付费/广告
+ * 旧版10倍自动修炼已停用，长期增长统一由在线计时与离线挂机承担。
  */
 router.post('/api/role/auto_cultivate', async (req, res) => {
   const { role_id } = req.body || {};
@@ -400,26 +431,7 @@ router.post('/api/role/auto_cultivate', async (req, res) => {
 
   const role = requireOwnedRole(res, role_id, req.playerId);
   if (!role) return;
-  if (isRateLimited(role.last_tick_time)) return res.json({ code: 4001, msg: '修炼请求过快', data: null });
-
-  const attr = getRow('SELECT cultivation_speed FROM t_role_attribute WHERE role_id = ?', [role_id]);
-  const speed = attr ? Math.max(attr.cultivation_speed, 1.0) * BASE_SPEED : BASE_SPEED;
-  const gain = Math.floor(speed * 10);
-  const newExp = role.cultivate_exp + gain;
-  const db = await getDb();
-  db.run('UPDATE t_role SET cultivate_exp = ?, total_cultivate_exp = total_cultivate_exp + ?, last_tick_time = datetime(\'now\',\'localtime\'), update_time = datetime(\'now\',\'localtime\') WHERE id = ?',
-    [newExp, gain, role_id]);
-  saveDb();
-
-  return res.json({
-    code: 0, msg: 'success',
-    data: {
-      cultivate_exp: newExp,
-      cultivate_exp_to_next: role.cultivate_exp_to_next,
-      gain,
-      cultivate_speed: speed,
-    },
-  });
+  return res.json({ code: 3001, msg: '自动加速已改为挂机修炼；请推图提高修炼效率', data: null });
 });
 
 /**
@@ -440,11 +452,12 @@ router.post('/api/role/start_afk', async (req, res) => {
     return res.json({ code: 3001, msg: '已在挂机中', data: null });
   }
 
+  const progression = getProgression(role_id, role.realm_level);
   const db = await getDb();
   db.run(
     `INSERT INTO t_afk_record (role_id, map_id, layer, start_time, status)
-     VALUES (?, 1, 1, datetime('now','localtime'), 0)`,
-    [role_id]
+     VALUES (?, ?, ?, datetime('now','localtime'), 0)`,
+    [role_id, progression.current_goal.map_id, Math.max(1, progression.current_goal.layer - 1)]
   );
   saveDb();
 
