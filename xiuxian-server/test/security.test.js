@@ -1,6 +1,6 @@
 const http = require('http');
 
-const BASE = 'http://127.0.0.1:3000';
+const BASE = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
 
 function request(method, path, body, token) {
   return new Promise((resolve, reject) => {

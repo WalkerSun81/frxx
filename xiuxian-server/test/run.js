@@ -6,11 +6,13 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const tempDir = path.join(__dirname, '.tmp');
 const dbPath = path.join(tempDir, 'xiuxian.test.db');
+const port = 3100;
+const baseUrl = `http://127.0.0.1:${port}`;
 const tests = ['phase0.test.js', 'api.test.js', 'phase1.test.js', 'phase2.test.js', 'phase3.test.js', 'phase4-6.test.js', 'phase7.test.js', 'security.test.js'];
 
 function requestHealth() {
   return new Promise((resolve) => {
-    const req = http.get('http://127.0.0.1:3000/api/health', (res) => resolve(res.statusCode === 200));
+    const req = http.get(`${baseUrl}/api/health`, (res) => resolve(res.statusCode === 200));
     req.on('error', () => resolve(false));
     req.setTimeout(500, () => { req.destroy(); resolve(false); });
   });
@@ -29,7 +31,7 @@ function run(file) {
     const child = spawn(process.execPath, [path.join(__dirname, file)], {
       cwd: root,
       stdio: 'inherit',
-      env: { ...process.env, XIUXIAN_DB_PATH: dbPath, NODE_ENV: 'test' },
+      env: { ...process.env, XIUXIAN_DB_PATH: dbPath, NODE_ENV: 'test', PORT: String(port), TEST_BASE_URL: baseUrl },
     });
     child.on('exit', (code) => code === 0 ? resolve() : reject(new Error(`${file} 失败，退出码 ${code}`)));
   });
@@ -40,7 +42,7 @@ async function main() {
   fs.mkdirSync(tempDir, { recursive: true });
   const server = spawn(process.execPath, ['server.js'], {
     cwd: root,
-    env: { ...process.env, XIUXIAN_DB_PATH: dbPath, NODE_ENV: 'test' },
+    env: { ...process.env, XIUXIAN_DB_PATH: dbPath, NODE_ENV: 'test', PORT: String(port), TEST_BASE_URL: baseUrl },
     stdio: 'inherit',
   });
   try {

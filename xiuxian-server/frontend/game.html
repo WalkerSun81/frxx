@@ -113,11 +113,64 @@
     .talent-chip.q-4 { border-left-color: var(--q-purple); }
     .talent-chip.q-5 { border-left-color: var(--q-orange); }
     .talent-chip.q-6 { border-left-color: var(--q-red); }
+
+    /* 第一阶段视觉底座：让现有玩法进入同一套星域修仙界面语言 */
+    .game-screen { position: relative; z-index: 1; padding: 12px 12px 82px; }
+    .world-mark { display: flex; align-items: baseline; justify-content: space-between; margin: 3px 4px 8px; color: var(--color-gold); font-family: "STKaiti", "KaiTi", serif; font-size: var(--font-xl); letter-spacing: .1em; text-shadow: 0 0 16px rgba(230,197,111,.3); }
+    .world-mark small { color: #8ee2ce; font-family: "PingFang SC", sans-serif; font-size: var(--font-xs); letter-spacing: .08em; }
+    .header-bar { padding: 13px 14px; background: rgba(8, 17, 34, .86); border: 1px solid rgba(119, 179, 170, .36); border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(230,197,111,.06); }
+    .realm-badge { color: var(--color-gold); font-family: "STKaiti", "KaiTi", serif; font-size: var(--font-xl); letter-spacing: .05em; }
+    .header-right .power { color: #9aa8c0; }
+    .res-row { gap: 7px; }
+    .res-item { background: rgba(12, 18, 40, .84); border: 1px solid rgba(113, 108, 169, .32); border-radius: 10px; padding: 7px 4px; transition: transform .2s ease, border-color .2s ease; }
+    .res-item .val { color: #f0d47d; }
+    .res-item.resource-update { transform: translateY(-2px); border-color: rgba(230,197,111,.72); }
+    .section-title { margin-top: 16px; color: var(--color-gold); border-bottom-color: rgba(133, 155, 184, .25); letter-spacing: .06em; }
+    .realm-progress-bar { height: 16px; border: 1px solid rgba(119, 179, 170, .26); background: rgba(4, 8, 19, .72); }
+    .realm-progress-fill { background: #d6b963; box-shadow: 0 0 14px rgba(230,197,111,.42); }
+    .realm-progress-ghost { background: rgba(93, 220, 183, .28); }
+    .attr-cell, .combat-cell, .equip-mini-slot, .equip-slot, .map-card { background: rgba(10, 17, 35, .83); border: 1px solid rgba(108, 121, 161, .28); border-radius: 9px; }
+    .attr-cell { padding: 7px 4px; }
+    .attr-cell .v, .combat-cell .v { color: #e8cd77; }
+    .talent-chip { background: rgba(25, 25, 56, .8); border-radius: 9px; border-left-width: 3px; }
+    .fetter-tag { background: rgba(87, 51, 126, .28); border-color: rgba(200, 146, 255, .44); color: #d9b9ff; }
+    .equip-mini-slot { padding: 5px 3px; border-style: solid; }
+    .map-card { min-height: 58px; padding: 10px; margin-bottom: 8px; }
+    .battle-log { background: rgba(4, 8, 19, .72); border: 1px solid rgba(115, 105, 170, .3); border-radius: 10px; line-height: 1.8; }
+    .bottom-tabs { position: fixed; left: 50%; bottom: 0; z-index: 12; width: min(100%, 450px); transform: translateX(-50%); gap: 4px; margin: 0; padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px)); background: rgba(5, 8, 20, .94); border-top: 1px solid rgba(104, 123, 160, .32); }
+    .tab-btn { position: relative; min-height: 44px; padding: 5px 2px; background: transparent; color: #98a1b6; font-size: var(--font-sm); transition: color .2s ease, background-color .2s ease, transform .2s ease; }
+    .tab-btn::before { content: ''; position: absolute; left: 18%; right: 18%; top: 0; height: 2px; background: transparent; }
+    .tab-btn.active { background: rgba(37, 77, 91, .38); color: #83edd3; }
+    .tab-btn.active::before { background: #72e2c6; box-shadow: 0 0 9px rgba(114,226,198,.8); }
+    .map-path { position: relative; padding: 4px 0 4px 27px; }
+    .map-path::before { content: ''; position: absolute; left: 13px; top: 20px; bottom: 24px; width: 1px; background: rgba(122, 103, 199, .55); }
+    .map-node { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 62px; margin-bottom: 9px; padding: 9px 9px 9px 25px; background: rgba(9, 17, 36, .82); border: 1px solid rgba(112, 117, 167, .32); border-radius: 10px; }
+    .map-node::before { content: ''; position: absolute; left: -22px; width: 19px; height: 19px; border-radius: 50%; background: #17132f; border: 2px solid #635698; box-shadow: 0 0 10px rgba(99,86,152,.35); }
+    .map-node.current { border-color: rgba(230,197,111,.7); box-shadow: 0 0 17px rgba(230,197,111,.12); }
+    .map-node.current::before { background: #e1c064; border-color: #f5df99; box-shadow: 0 0 13px rgba(230,197,111,.68); animation: mapPulse 1.9s ease-in-out infinite; }
+    .map-node.locked { opacity: .46; }
+    @keyframes mapPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    .battle-arena { position: relative; height: 205px; overflow: hidden; border: 1px solid rgba(117, 153, 143, .58); border-radius: 12px; background-image: url('assets/battle-green-valley.png'); background-position: center; background-size: cover; box-shadow: inset 0 0 0 1px rgba(230,197,111,.12); }
+    .battle-unit { position: absolute; bottom: 18px; width: 112px; padding: 7px; border-radius: 9px; background: rgba(9, 15, 31, .82); border: 1px solid rgba(199, 215, 221, .58); text-align: center; color: #edf0f5; transition: transform .24s ease, opacity .24s ease; }
+    .battle-player { left: 14px; border-color: rgba(107, 194, 255, .8); }
+    .battle-monster { right: 14px; border-color: rgba(241, 143, 122, .82); }
+    .battle-unit-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-xs); }
+    .battle-hp { height: 7px; margin-top: 6px; overflow: hidden; border-radius: 8px; background: rgba(5, 9, 18, .75); }
+    .battle-hp span { display: block; width: 100%; height: 100%; background: #63aef2; transition: width .45s ease; }
+    .battle-hp.monster span { background: #e67061; }
+    .battle-unit.hit { transform: translateX(-7px); }
+    .battle-player.hit { transform: translateX(7px); }
+    .battle-unit.defeated { opacity: .25; transform: translateY(12px); }
+    .battle-damage { position: absolute; left: 50%; top: 33%; min-width: 60px; transform: translateX(-50%); color: #ed665f; font-weight: 700; font-size: var(--font-xl); text-align: center; text-shadow: 0 1px 2px #fff; opacity: 0; pointer-events: none; }
+    .battle-damage.show { animation: battleDamage .72s ease-out both; }
+    .battle-damage.crit { color: #f1b743; font-size: var(--font-2xl); }
+    @keyframes battleDamage { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.74); } 24% { opacity: 1; transform: translate(-50%, -5px) scale(1.08); } 100% { opacity: 0; transform: translate(-50%, -36px) scale(1); } }
   </style>
 </head>
 <body>
   <div class="app-container">
     <div class="game-screen" id="app">
+      <div class="world-mark"><span>修仙前传</span><small>灵息流转中</small></div>
       <!-- Header -->
       <div class="header-bar">
         <div>
@@ -206,13 +259,24 @@
 
       <!-- TAB 2: 战斗 -->
       <div class="tab-content" id="tabBattle">
-        <div class="section-title">地图</div>
-        <div id="mapList"></div>
-        <div class="battle-log" id="battleLog" style="display:none"></div>
         <div class="section-title" id="battleTitle" style="display:none">战斗</div>
+        <div class="battle-arena" id="battleArena" style="display:none">
+          <div class="battle-unit battle-player" id="battlePlayerUnit">
+            <div class="battle-unit-name" id="battlePlayerName">道友</div>
+            <div class="battle-hp"><span id="battlePlayerHp"></span></div>
+          </div>
+          <div class="battle-damage" id="battleDamage" aria-live="polite"></div>
+          <div class="battle-unit battle-monster" id="battleMonsterUnit">
+            <div class="battle-unit-name" id="battleMonsterName">守境灵兽</div>
+            <div class="battle-hp monster"><span id="battleMonsterHp"></span></div>
+          </div>
+        </div>
+        <div class="battle-log" id="battleLog" style="display:none"></div>
         <div class="btn-row" id="battleBtns" style="display:none">
           <button class="btn btn-primary" id="btnChallenge">挑战当前层</button>
         </div>
+        <div class="section-title">地图</div>
+        <div id="mapList"></div>
         <div class="text-xs text-center text-dim" id="mapHint">选择地图开始战斗</div>
       </div>
 
@@ -322,6 +386,12 @@
         Q('goldVal').textContent = d.resources.gold;
         Q('copperVal').textContent = d.resources.copper;
         Q('enhanceStone').textContent = d.resources.enhance_stone || 0;
+        ['goldVal', 'copperVal', 'enhanceStone'].forEach(function(id) {
+          var item = Q(id).parentElement;
+          item.classList.remove('resource-update');
+          requestAnimationFrame(function() { item.classList.add('resource-update'); });
+          setTimeout(function() { item.classList.remove('resource-update'); }, 240);
+        });
 
         // 境界进度条
         var exp = d.basic.cultivate_exp;
@@ -588,7 +658,8 @@
         if (pct >= 100) ghost.classList.remove('wave'); else ghost.classList.add('wave');
         Q('realmProgressTxt').textContent = exp.toLocaleString() + ' / ' + expNext.toLocaleString();
         Q('realmPct').textContent = pct + '%';
-        Q('expVal').textContent = exp + '/' + expNext;
+        var expVal = Q('expVal');
+        if (expVal) expVal.textContent = exp + '/' + expNext;
         var canBreak = exp >= expNext;
         Q('btnBreakthrough').disabled = !canBreak;
         Q('breakHint').textContent = canBreak ? '修为已满，可以突破！' : '还需 ' + (expNext - exp).toLocaleString() + ' 修为';
@@ -674,15 +745,69 @@
 
       // ====== 战斗 ======
       var selectedMap = 1, selectedLayer = 1;
+      function setBattleHp(id, current, max) {
+        var pct = Math.max(0, Math.min(100, Math.round((current / Math.max(max, 1)) * 100)));
+        Q(id).style.width = pct + '%';
+      }
+      function prepareBattleArena(mapName) {
+        var maxHp = cachedInfo && cachedInfo.attributes ? cachedInfo.attributes.hp : 100;
+        Q('battleArena').style.display = 'block';
+        Q('battlePlayerName').textContent = cachedInfo && cachedInfo.basic ? cachedInfo.basic.name : '道友';
+        Q('battleMonsterName').textContent = mapName + '守境灵兽';
+        setBattleHp('battlePlayerHp', maxHp, maxHp);
+        setBattleHp('battleMonsterHp', 100, 100);
+        Q('battlePlayerUnit').classList.remove('hit', 'defeated');
+        Q('battleMonsterUnit').classList.remove('hit', 'defeated');
+      }
+      function showBattleDamage(value, crit) {
+        var el = Q('battleDamage');
+        el.textContent = '-' + value + (crit ? ' 暴击' : '');
+        el.className = 'battle-damage' + (crit ? ' crit' : '');
+        void el.offsetWidth;
+        el.classList.add('show');
+      }
+      function playBattleVisual(data) {
+        var logs = data.log || [];
+        var playerMax = cachedInfo && cachedInfo.attributes ? cachedInfo.attributes.hp : 100;
+        var lastPlayerHp = playerMax;
+        var lastMonsterHp = data.monster.hp;
+        logs.forEach(function(log) {
+          if (log.playerHp != null) lastPlayerHp = log.playerHp;
+          if (log.monsterHp != null) lastMonsterHp = log.monsterHp;
+        });
+        Q('battleMonsterName').textContent = data.monster.name;
+        setBattleHp('battlePlayerHp', playerMax, playerMax);
+        setBattleHp('battleMonsterHp', data.monster.hp, data.monster.hp);
+        var playerHit = logs.find(function(log) { return log.attacker === '玩家'; });
+        var monsterHit = logs.find(function(log) { return log.attacker !== '玩家'; });
+        if (playerHit) {
+          Q('battleMonsterUnit').classList.add('hit');
+          showBattleDamage(playerHit.damage, playerHit.isCrit);
+          setTimeout(function() { Q('battleMonsterUnit').classList.remove('hit'); setBattleHp('battleMonsterHp', playerHit.monsterHp, data.monster.hp); }, 180);
+        }
+        if (monsterHit) {
+          setTimeout(function() {
+            Q('battlePlayerUnit').classList.add('hit');
+            showBattleDamage(monsterHit.damage, false);
+            setTimeout(function() { Q('battlePlayerUnit').classList.remove('hit'); setBattleHp('battlePlayerHp', monsterHit.playerHp, playerMax); }, 180);
+          }, 340);
+        }
+        setTimeout(function() {
+          setBattleHp('battlePlayerHp', lastPlayerHp, playerMax);
+          setBattleHp('battleMonsterHp', lastMonsterHp, data.monster.hp);
+          if (data.result === 'win') Q('battleMonsterUnit').classList.add('defeated');
+          if (data.result === 'lose') Q('battlePlayerUnit').classList.add('defeated');
+        }, 680);
+      }
       function loadMaps() {
         API.battleMaps(roleId).then(function(r) {
           if (r.code !== 0) return;
-          Q('mapList').innerHTML = r.data.maps.map(function(m) {
+          Q('mapList').innerHTML = '<div class="map-path">' + r.data.maps.map(function(m) {
             var unlocked = cachedInfo && cachedInfo.basic.realm_level >= m.unlockRealm;
-            return '<div class="map-card" data-map="' + m.map_id + '"><div><div class="info">' + m.name + ' ' + (unlocked ? '' : '<span class="text-dim text-xs">(未解锁)</span>') + '</div><div class="prog">' + (unlocked ? '进度: ' + m.max_layer + '/' + m.layers + '层' : '境界不足') + '</div></div><button class="btn btn-ghost btn-sm"' + (!unlocked ? ' disabled' : '') + '>选择</button></div>';
-          }).join('');
+            return '<div class="map-node' + (m.map_id === selectedMap ? ' current' : '') + (!unlocked ? ' locked' : '') + '" data-map="' + m.map_id + '"><div><div class="info">' + m.name + '</div><div class="prog">' + (unlocked ? '历练进度 ' + m.max_layer + '/' + m.layers + ' 层' : '需境界 ' + m.unlockRealm) + '</div></div><button class="btn btn-ghost btn-sm"' + (!unlocked ? ' disabled' : '') + '>入境</button></div>';
+          }).join('') + '</div>';
 
-          document.querySelectorAll('.map-card').forEach(function(card) {
+          document.querySelectorAll('.map-node').forEach(function(card) {
             var mapId = parseInt(card.dataset.map);
             card.querySelector('button').addEventListener('click', function() {
               selectedMap = mapId;
@@ -693,6 +818,7 @@
               Q('battleBtns').style.display = 'flex';
               Q('mapHint').style.display = 'none';
               Q('battleLog').style.display = 'none';
+              prepareBattleArena(mapData ? mapData.name : '秘境');
             });
           });
         });
@@ -702,6 +828,7 @@
         var r = await API.challenge(roleId, selectedMap, selectedLayer);
         Q('btnChallenge').disabled = false;
         if (r.code !== 0) { UI.toast(r.msg); return; }
+        playBattleVisual(r.data);
         var html = '';
         (r.data.log || []).forEach(function(l) {
           if (l.attacker === '玩家') {

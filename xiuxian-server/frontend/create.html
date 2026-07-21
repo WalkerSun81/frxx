@@ -11,133 +11,158 @@
     .create-screen {
       min-height: 100vh;
       min-height: 100dvh;
-      padding: var(--sp-lg);
+      padding: 22px 18px 30px;
+      position: relative;
+      z-index: 1;
     }
 
-    /* 步骤指示器 */
+    .ritual-header { text-align: center; margin: 8px 0 22px; }
+    .ritual-title { color: var(--color-gold); font-family: "STKaiti", "KaiTi", serif; font-size: 1.8rem; font-weight: 700; letter-spacing: 0.12em; text-shadow: 0 0 18px rgba(230,197,111,.28); }
+    .ritual-subtitle { margin-top: 5px; color: #b6b0d1; font-size: var(--font-xs); letter-spacing: .18em; }
+    .ritual-note { min-height: 18px; margin: 8px 0 14px; color: #a7b1c7; text-align: center; font-size: var(--font-xs); }
+
     .step-bar {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      margin-bottom: var(--sp-lg);
+      gap: 8px;
+      margin-bottom: 18px;
     }
     .step-dot {
-      width: 1.8rem;
-      height: 1.8rem;
+      width: 1.7rem;
+      height: 1.7rem;
       border-radius: 50%;
-      background: var(--color-panel);
-      border: 1px solid var(--color-border);
+      background: rgba(11,20,38,.86);
+      border: 1px solid rgba(126,110,187,.55);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: var(--font-sm);
-      transition: all 0.3s;
+      font-size: var(--font-xs);
+      color: #9e9db5;
+      transition: color .28s ease, background-color .28s ease, box-shadow .28s ease, transform .28s ease;
     }
-    .step-dot.active { background: var(--color-gold); color: #1a1a2e; border-color: var(--color-gold); }
-    .step-dot.done   { background: var(--color-success); color: #fff; border-color: var(--color-success); }
+    .step-dot.active { background: #e6c56f; color: #17121e; border-color: #f6dfa2; box-shadow: 0 0 16px rgba(230,197,111,.5); transform: scale(1.08); }
+    .step-dot.done   { background: #4cc8ac; color: #07151a; border-color: #8af1d8; }
     .step-line {
-      width: 1rem;
-      height: 1px;
-      background: var(--color-border);
+      width: 1.8rem;
+      height: 2px;
+      background: rgba(126,110,187,.28);
     }
-    .step-line.done { background: var(--color-success); }
+    .step-line.done { background: #4cc8ac; box-shadow: 0 0 8px rgba(76,200,172,.5); }
 
-    /* 步骤面板 */
     .step-panel { display: none; }
-    .step-panel.active { display: block; }
+    .step-panel.active { display: block; animation: ritualEnter .38s ease both; }
+    @keyframes ritualEnter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* 雷达 */
+    .awakening-panel { overflow: hidden; padding: 18px 14px 16px; background: rgba(8, 15, 31, .83); }
+    .panel-label { color: var(--color-gold); font-size: var(--font-lg); font-family: "STKaiti", "KaiTi", serif; letter-spacing: .08em; text-align: center; }
+    .panel-description { color: #9da8c0; font-size: var(--font-xs); text-align: center; margin: 5px 0 10px; }
+
     .radar-wrap {
       display: flex;
       justify-content: center;
-      margin: var(--sp-md) 0;
+      align-items: center;
+      margin: 4px 0 7px;
     }
     .radar-canvas {
-      width: 60vw;
-      height: 60vw;
-      max-width: 230px;
-      max-height: 230px;
+      width: min(72vw, 286px);
+      height: min(72vw, 286px);
     }
     .element-info {
       text-align: center;
-      margin: var(--sp-sm) 0;
+      margin: 3px 0 12px;
     }
     .element-main {
       color: var(--color-gold);
-      font-size: var(--font-xl);
+      font-size: var(--font-2xl);
       font-weight: bold;
+      font-family: "STKaiti", "KaiTi", serif;
+      letter-spacing: .06em;
+      text-shadow: 0 0 14px rgba(230,197,111,.28);
     }
     .multiplier {
-      color: var(--color-text-dim);
+      color: #70dbc4;
       font-size: var(--font-sm);
+      margin-top: 2px;
     }
+    .element-quality { display: inline-flex; margin-top: 6px; padding: 2px 10px; border: 1px solid rgba(107,216,191,.45); border-radius: 999px; color: #8dedcf; background: rgba(31,126,106,.22); font-size: var(--font-xs); }
+    .reroll-hint { color: #a4a9c0; font-size: var(--font-xs); text-align: center; margin: 10px 0 0; }
 
-    /* 命格 */
+    .constellation-wrap { position: relative; display: flex; justify-content: center; margin: 0 0 12px; }
+    .constellation-canvas { width: min(78vw, 304px); height: min(78vw, 304px); }
     .talent-list {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      margin-bottom: var(--sp-sm);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
     }
     .talent-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--sp-xs) var(--sp-sm);
-      background: var(--color-panel);
-      border-radius: var(--radius-sm);
+      min-height: 62px;
+      padding: 8px 9px;
+      background: rgba(22, 24, 53, .82);
+      border-radius: 9px;
+      border: 1px solid rgba(117,108,170,.35);
       border-left: 3px solid var(--q-white);
+      animation: talentReveal .35s ease both;
     }
+    @keyframes talentReveal { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
     .talent-card.q-1 { border-left-color: var(--q-white); }
     .talent-card.q-2 { border-left-color: var(--q-green); }
     .talent-card.q-3 { border-left-color: var(--q-blue); }
     .talent-card.q-4 { border-left-color: var(--q-purple); }
     .talent-card.q-5 { border-left-color: var(--q-orange); }
     .talent-card.q-6 { border-left-color: var(--q-red); }
-    .talent-detail { font-size: var(--font-xs); }
-    .talent-value { font-size: var(--font-md); font-weight: bold; }
+    .talent-detail { font-size: var(--font-xs); line-height: 1.35; margin-top: 2px; }
+    .talent-value { font-size: var(--font-md); font-weight: bold; margin-top: 3px; }
 
     .fetter-list {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--sp-xs);
-      margin-bottom: var(--sp-sm);
+      gap: 6px;
+      margin-bottom: 12px;
     }
     .fetter-tag {
-      padding: 2px 8px;
-      border-radius: var(--radius-sm);
+      padding: 3px 8px;
+      border-radius: 999px;
       font-size: var(--font-xs);
-      background: var(--color-panel);
-      border: 1px solid var(--color-gold-dim);
-      color: var(--color-gold);
+      background: rgba(79, 42, 116, .35);
+      border: 1px solid rgba(195, 129, 255, .5);
+      color: #dfbbff;
     }
 
     /* 表单 */
     .input-group input {
       width: 100%;
       padding: var(--sp-sm);
-      background: var(--color-panel);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
+      background: rgba(12, 18, 35, .84);
+      border: 1px solid rgba(133, 158, 186, .5);
+      border-radius: 9px;
       color: var(--color-text);
       font-size: var(--font-md);
       outline: none;
     }
-    .input-group input:focus { border-color: var(--color-gold); }
+    .input-group input:focus { border-color: var(--color-gold); box-shadow: 0 0 0 2px rgba(230,197,111,.12); }
 
     .btn-row {
       display: flex;
       gap: var(--sp-sm);
-      margin-top: var(--sp-md);
+      margin-top: 14px;
     }
     .btn-row .btn { flex: 1; }
+    .btn-row .btn-primary { min-width: 0; }
+
+    .name-panel { margin-top: 6vh; }
+    .name-panel .panel-title { text-align: center; border: 0; font-family: "STKaiti", "KaiTi", serif; font-size: var(--font-xl); letter-spacing: .1em; }
+    .name-panel .btn { margin-top: 2px; }
   </style>
 </head>
 <body>
   <div class="app-container">
     <div class="create-screen" id="app">
-      <!-- 步骤 -->
+      <header class="ritual-header">
+        <div class="ritual-title" id="ritualTitle">天道造化</div>
+        <div class="ritual-subtitle" id="ritualSubtitle">引灵入命 · 见证仙途伊始</div>
+      </header>
       <div class="step-bar">
         <span class="step-dot active" id="stepDot1">1</span>
         <span class="step-line" id="stepLine1"></span>
@@ -148,8 +173,9 @@
 
       <!-- Step 1 -->
       <div class="step-panel active" id="step1Panel">
-        <div class="panel">
+        <div class="panel name-panel">
           <div class="panel-title">道号</div>
+          <div class="panel-description">取一方道号，自此踏入浩渺仙途</div>
           <div class="input-group" style="margin-bottom:var(--sp-md)">
             <input type="text" id="roleNameInput" maxlength="8" placeholder="请输入你的道号（2-8字符）">
           </div>
@@ -159,31 +185,38 @@
 
       <!-- Step 2 -->
       <div class="step-panel" id="step2Panel">
-        <div class="panel">
-          <div class="panel-title">灵根觉醒</div>
+        <div class="panel awakening-panel">
+          <div class="panel-label">灵根天赋 · 第一步</div>
+          <div class="panel-description">五行灵息流转，静观天道所赐</div>
           <div class="radar-wrap">
             <canvas class="radar-canvas" id="radarCanvas"></canvas>
           </div>
           <div class="element-info">
-            <div class="element-main" id="mainElement">—</div>
+            <div class="element-main" id="mainElement">灵根未显</div>
+            <div class="element-quality" id="elementQuality">灵息汇聚中</div>
             <div class="multiplier" id="multiplier">—</div>
           </div>
           <div class="btn-row">
-            <button class="btn btn-ghost" id="btnReroll">重随</button>
-            <button class="btn btn-primary" id="btnConfirmElement">确认灵根</button>
+            <button class="btn btn-ghost" id="btnReroll">再观天道</button>
+            <button class="btn btn-primary" id="btnConfirmElement">感悟此缘</button>
           </div>
+          <div class="reroll-hint">每次观悟都会带来新的五行感应</div>
         </div>
       </div>
 
       <!-- Step 3 -->
       <div class="step-panel" id="step3Panel">
-        <div class="panel">
-          <div class="panel-title">命格星盘</div>
+        <div class="panel awakening-panel">
+          <div class="panel-label">命格星盘 · 第二步</div>
+          <div class="panel-description">星辉落定，择定与你同行的天赋</div>
+          <div class="constellation-wrap">
+            <canvas class="constellation-canvas" id="constellationCanvas"></canvas>
+          </div>
           <div class="talent-list" id="talentList"></div>
           <div class="fetter-list" id="fetterList"></div>
           <div class="btn-row">
-            <button class="btn btn-ghost" id="btnRerollTalent">重抽</button>
-            <button class="btn btn-primary" id="btnConfirmTalent">确认命格</button>
+            <button class="btn btn-ghost" id="btnRerollTalent">重观星盘</button>
+            <button class="btn btn-primary" id="btnConfirmTalent">定下命格</button>
           </div>
         </div>
       </div>
@@ -200,18 +233,26 @@
       let roleId = null;
       let elementData = null;
       let talentData = null;
+      let radarFrame = null;
+      let constellationFrame = null;
       const QUALITY_NAMES = ['', '凡品', '良品', '优品', '极品', '仙品', '神品'];
       const QUALITY_CLASS = ['', 'q-1', 'q-2', 'q-3', 'q-4', 'q-5', 'q-6'];
+      const ELEMENT_NAMES = ['金', '木', '水', '火', '土'];
+      const ELEMENT_COLORS = ['#e6c56f', '#72e29f', '#63b9ff', '#ff766d', '#dca965'];
 
       const $ = (id) => document.getElementById(id);
 
       // Steps
       function setStep(n) {
+        const titles = ['天道造化', '灵根天赋', '命格星盘'];
+        const subtitles = ['引灵入命 · 见证仙途伊始', '观五行之气 · 择一身仙缘', '引群星入命 · 定前路因果'];
         for (let i = 1; i <= 3; i++) {
           $(`step${i}Panel`).className = 'step-panel' + (i === n ? ' active' : '');
           $(`stepDot${i}`).className = 'step-dot' + (i === n ? ' active' : i < n ? ' done' : '');
           if (i < 3) $(`stepLine${i}`).className = 'step-line' + (i < n ? ' done' : '');
         }
+        $('ritualTitle').textContent = titles[n - 1];
+        $('ritualSubtitle').textContent = subtitles[n - 1];
       }
 
       // Step 1
@@ -231,12 +272,18 @@
 
       // Step 2
       async function rollElement() {
+        $('btnReroll').disabled = true;
+        $('elementQuality').textContent = '灵息汇聚中';
         const resp = await API.randomElement(roleId);
+        $('btnReroll').disabled = false;
         if (resp.code !== 0) { UI.toast(resp.msg); return; }
         elementData = resp.data;
         drawRadar(resp.data);
-        $('mainElement').textContent = '主灵根: ' + resp.data.main_element_name;
-        $('multiplier').textContent = '修炼倍率: ' + resp.data.cultivate_multiplier;
+        const peak = Math.max(resp.data.metal, resp.data.wood, resp.data.water, resp.data.fire, resp.data.earth);
+        const quality = peak >= 70 ? '天品' : peak >= 50 ? '优品' : peak >= 30 ? '良品' : '凡品';
+        $('mainElement').textContent = resp.data.main_element_name + '灵根';
+        $('elementQuality').textContent = quality + ' · 主灵根感应 ' + peak;
+        $('multiplier').textContent = '修炼加成 ×' + resp.data.cultivate_multiplier;
       }
       $('btnReroll').addEventListener('click', rollElement);
       $('btnConfirmElement').addEventListener('click', async () => {
@@ -250,6 +297,7 @@
 
       // Radar
       function drawRadar(data) {
+        if (radarFrame) cancelAnimationFrame(radarFrame);
         const canvas = $('radarCanvas');
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const rect = canvas.getBoundingClientRect();
@@ -258,62 +306,82 @@
         const ctx = canvas.getContext('2d');
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         const w = rect.width, h = rect.height, cx = w / 2, cy = h / 2, r = Math.min(w, h) * 0.34;
-        const labels = ['金', '木', '水', '火', '土'];
+        const labels = ELEMENT_NAMES;
         const values = [data.metal, data.wood, data.water, data.fire, data.earth];
-        const maxVal = 80;
-
-        // BG
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-        ctx.fillStyle = 'rgba(26,26,46,0.6)';
-        for (let i = 1; i <= 4; i++) {
+        const maxVal = 100;
+        const startedAt = performance.now();
+        function point(index, scale) {
+          const angle = -Math.PI / 2 + (Math.PI * 2 / 5) * index;
+          return { x: cx + Math.cos(angle) * r * (values[index] / maxVal) * scale, y: cy + Math.sin(angle) * r * (values[index] / maxVal) * scale };
+        }
+        function polygon(scale, multiplier, fill) {
           ctx.beginPath();
           for (let j = 0; j < 5; j++) {
-            const a = -Math.PI / 2 + (Math.PI * 2 / 5) * j;
-            const x = cx + Math.cos(a) * r * (i / 4), y = cy + Math.sin(a) * r * (i / 4);
+            const angle = -Math.PI / 2 + (Math.PI * 2 / 5) * j;
+            const x = cx + Math.cos(angle) * r * multiplier * scale;
+            const y = cy + Math.sin(angle) * r * multiplier * scale;
             if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
           }
-          ctx.closePath(); ctx.stroke();
+          ctx.closePath();
+          if (fill) ctx.fill(); else ctx.stroke();
         }
-        // Axes
-        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-        ctx.beginPath();
-        for (let j = 0; j < 5; j++) {
-          const a = -Math.PI / 2 + (Math.PI * 2 / 5) * j;
-          ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+        function render(now) {
+          const progress = Math.min(1, (now - startedAt) / 650);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          ctx.clearRect(0, 0, w, h);
+          ctx.lineWidth = 1;
+          for (let i = 1; i <= 4; i++) {
+            ctx.strokeStyle = 'rgba(147, 131, 197, .34)';
+            polygon(1, i / 4, false);
+          }
+          ctx.strokeStyle = 'rgba(170, 153, 221, .34)';
+          ctx.beginPath();
+          for (let j = 0; j < 5; j++) {
+            const angle = -Math.PI / 2 + (Math.PI * 2 / 5) * j;
+            ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+          }
+          ctx.stroke();
+          ctx.fillStyle = 'rgba(79, 190, 168, .22)';
+          ctx.strokeStyle = '#7ae0c9';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let j = 0; j < 5; j++) {
+            const p = point(j, eased);
+            if (j === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+          }
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.textAlign = 'center';
+          for (let j = 0; j < 5; j++) {
+            const angle = -Math.PI / 2 + (Math.PI * 2 / 5) * j;
+            const lx = cx + Math.cos(angle) * r * 1.22;
+            const ly = cy + Math.sin(angle) * r * 1.22;
+            ctx.fillStyle = ELEMENT_COLORS[j];
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillText(labels[j], lx, ly);
+            ctx.fillStyle = '#c3c7d6';
+            ctx.font = '11px sans-serif';
+            ctx.fillText(values[j], lx, ly + 15);
+            const p = point(j, eased);
+            ctx.beginPath(); ctx.arc(p.x, p.y, 4 + Math.sin(now / 210 + j) * .8, 0, Math.PI * 2);
+            ctx.fillStyle = ELEMENT_COLORS[j]; ctx.fill();
+          }
+          ctx.beginPath(); ctx.arc(cx, cy, 4 + Math.sin(now / 260) * 1.2, 0, Math.PI * 2);
+          ctx.fillStyle = '#f4d778'; ctx.fill();
+          if (progress < 1) radarFrame = requestAnimationFrame(render);
         }
-        ctx.stroke();
-        // Data
-        ctx.fillStyle = 'rgba(212,165,74,0.25)';
-        ctx.strokeStyle = '#d4a54a';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        for (let j = 0; j < 5; j++) {
-          const a = -Math.PI / 2 + (Math.PI * 2 / 5) * j;
-          const x = cx + Math.cos(a) * r * (values[j] / maxVal);
-          const y = cy + Math.sin(a) * r * (values[j] / maxVal);
-          if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-        // Labels
-        ctx.fillStyle = '#e0d5c1';
-        ctx.font = 'bold 10px sans-serif';
-        ctx.textAlign = 'center';
-        for (let j = 0; j < 5; j++) {
-          const a = -Math.PI / 2 + (Math.PI * 2 / 5) * j;
-          ctx.fillText(labels[j], cx + Math.cos(a) * r * 1.2, cy + Math.sin(a) * r * 1.2 + 3);
-        }
-        ctx.fillStyle = '#d4a54a';
-        ctx.font = 'bold 14px sans-serif';
-        ctx.fillText(values.reduce((a, b) => a + b, 0), cx, cy + 4);
+        radarFrame = requestAnimationFrame(render);
       }
 
       // Step 3
       async function rollTalent() {
+        $('btnRerollTalent').disabled = true;
         const resp = await API.randomTalent(roleId);
+        $('btnRerollTalent').disabled = false;
         if (resp.code !== 0) { UI.toast(resp.msg); return; }
         talentData = resp.data;
+        drawConstellation(resp.data.talents);
         $('talentList').innerHTML = resp.data.talents.map((t) => `
-          <div class="talent-card ${QUALITY_CLASS[t.quality]}">
+          <div class="talent-card ${QUALITY_CLASS[t.quality]}" style="animation-delay:${t.slot_index * 55}ms">
             <div>
               <div style="font-weight:bold;font-size:var(--font-sm)">${t.talent_name}</div>
               <div class="talent-detail text-dim">${QUALITY_NAMES[t.quality]}${t.passive ? ' · ' + t.passive : ''}</div>
@@ -323,6 +391,59 @@
         $('fetterList').innerHTML = resp.data.fetters.map((f) =>
           `<span class="fetter-tag">${f.category}: ${f.name} · ${f.effect}</span>`
         ).join('');
+      }
+
+      function drawConstellation(talents) {
+        if (constellationFrame) cancelAnimationFrame(constellationFrame);
+        const canvas = $('constellationCanvas');
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const w = rect.width, h = rect.height, cx = w / 2, cy = h / 2;
+        const ring = Math.min(w, h) * .33;
+        const qualityColors = ['#c7cad6', '#73e69e', '#6ebcff', '#cf7aff', '#ffb85f', '#ff7484'];
+        const nodes = talents.map((talent, index) => {
+          const angle = -Math.PI / 2 + index * Math.PI * 2 / talents.length;
+          return { talent, x: cx + Math.cos(angle) * ring, y: cy + Math.sin(angle) * ring, color: qualityColors[talent.quality - 1] };
+        });
+        const startedAt = performance.now();
+        function render(now) {
+          const progress = Math.min(1, (now - startedAt) / 720);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          ctx.clearRect(0, 0, w, h);
+          ctx.strokeStyle = 'rgba(139, 109, 210, .33)';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(cx, cy, ring + 15, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(cx, cy, ring * .55, 0, Math.PI * 2); ctx.stroke();
+          for (let i = 0; i < nodes.length; i++) {
+            const a = nodes[i], b = nodes[(i + 1) % nodes.length];
+            ctx.strokeStyle = 'rgba(138, 107, 215, .5)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + (a.x - cx) * eased, cy + (a.y - cy) * eased); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(a.x + (b.x - a.x) * eased, a.y + (b.y - a.y) * eased); ctx.stroke();
+          }
+          nodes.forEach((node, index) => {
+            const pulse = 1 + Math.sin(now / 240 + index) * .08;
+            const radius = (18 + node.talent.quality * 2) * eased * pulse;
+            ctx.beginPath(); ctx.arc(node.x, node.y, radius + 7, 0, Math.PI * 2);
+            ctx.fillStyle = node.color + '22'; ctx.fill();
+            ctx.beginPath(); ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = node.color; ctx.fill();
+            ctx.fillStyle = '#111527'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText(QUALITY_NAMES[node.talent.quality].charAt(0), node.x, node.y + 5);
+            ctx.fillStyle = node.color; ctx.font = '11px sans-serif';
+            ctx.fillText(node.talent.talent_name, node.x, node.y + radius + 16);
+          });
+          ctx.beginPath(); ctx.arc(cx, cy, 5 + Math.sin(now / 180) * 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#f3d876'; ctx.fill();
+          ctx.fillStyle = '#d9c3ff'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('命格共鸣', cx, cy + 23);
+          if (progress < 1) constellationFrame = requestAnimationFrame(render);
+        }
+        constellationFrame = requestAnimationFrame(render);
       }
       $('btnRerollTalent').addEventListener('click', rollTalent);
       $('btnConfirmTalent').addEventListener('click', async () => {

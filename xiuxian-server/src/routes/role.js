@@ -145,6 +145,8 @@ router.get('/api/role/info', async (req, res) => {
         physical_attack: attrs.physical_attack, physical_defense: attrs.physical_defense,
         magical_attack: attrs.magical_attack, magical_defense: attrs.magical_defense,
         crit_rate: attrs.crit_rate, crit_damage: attrs.crit_damage,
+        dodge_rate: attrs.dodge_rate, hit_rate: attrs.hit_rate,
+        attack_speed: attrs.attack_speed,
         cultivation_speed: attrs.cultivation_speed,
       },
       element_root: element || null,

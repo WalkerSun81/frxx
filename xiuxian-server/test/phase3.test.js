@@ -1,5 +1,5 @@
 const http = require('http');
-const BASE = 'http://localhost:3000';
+const BASE = process.env.TEST_BASE_URL || 'http://localhost:3000';
 let p = 0, f = 0, errs = [];
 
 function rq(method, path, body, token) {
